@@ -123,5 +123,5 @@ schema-editor:    0fdcf7b  "updated the README.md" — 7 files modified, not com
   1. Commit all schema-editor changes (10+ files, all today's work)
   2. Wire delete: click bezier hit-test + Delete key (not yet implemented)
   3. Table mode: row count gate (warn > 5k) + chunked render
-  4. Connect TAFNE to canvas via PostMessage / IFC bus
+  4. Connect Table IDE to canvas via PostMessage / IFC bus
   5. PDF processor frontend wiring

@@ -153,9 +153,9 @@
     </script>
     <script src="https://unpkg.com/imagetracer-js@1.2.6/imagetracer_v1.2.6.js"></script>
 
-    <!-- Shared portfolio styles + TIFANY base -->
+    <!-- Shared portfolio styles + TABLE_IDE base -->
     <link rel="stylesheet" href="../../assets/css/portfolio.css" />
-    <link rel="stylesheet" href="../table-formatter/dist/tifany.min.css" />
+    <link rel="stylesheet" href="../table-formatter/dist/tableIde.min.css" />
 
     <!-- Tool-specific styles -->
     <link rel="stylesheet" href="src/css/svgEditorUI.css" />
@@ -245,7 +245,7 @@
       <!-- ======================================================
          HEADER
          ====================================================== -->
-      <!-- <header class="tifany-header">
+      <!-- <header class="table-ide-header">
             <div class="logo">
                 <h1>
                     <a href="../../index.html" style="text-decoration:none;color:inherit;">
@@ -966,11 +966,11 @@
           <div
             class="btn gx-pro-locked"
             style="position: relative"
-            title="Send netlist/BOM to TAFNE (Pro)"
+            title="Send netlist/BOM to Table IDE (Pro)"
           >
             <iconify-icon icon="material-symbols:send-outline"></iconify-icon>
             <span class="panel-content"
-              >→ TAFNE <span class="gx-pro-badge">PRO</span></span
+              >→ Table IDE <span class="gx-pro-badge">PRO</span></span
             >
             <div
               class="gx-pro-interceptor"
@@ -1046,20 +1046,20 @@
           <button
             class="btn export-domain-btn"
             data-mode="software"
-            id="sendFsmToTafneBtn"
-            title="Send FSM to TAFNE"
+            id="sendFsmToTableIdeBtn"
+            title="Send FSM to Table IDE"
           >
             <iconify-icon icon="material-symbols:send-outline"></iconify-icon>
-            <span class="panel-content">→ TAFNE</span>
+            <span class="panel-content">→ Table IDE</span>
           </button>
           <!-- Closes the loop: edits made here go back to the sheet and cell the
                table was promoted from. Enabled only when this schema HAS a
-               basis, i.e. it came from TAFNE. -->
+               basis, i.e. it came from Table IDE. -->
           <button
             class="btn export-domain-btn"
             data-mode="software"
             id="sendSchemaAnnotationBtn"
-            title="Send schema edits back to TAFNE"
+            title="Send schema edits back to Table IDE"
           >
             <iconify-icon icon="material-symbols:undo"></iconify-icon>
             <span class="panel-content">Back-annotate</span>
@@ -1769,7 +1769,7 @@
         // Batch / SQL / Mermaid-Sequence were Pro-gated as <div> overlays, which
         // meant three finished exporters shipped with no caller: exportAsSqlDdl
         // and exportAsMermaidSequence were dead code reachable from nowhere.
-        // sendToTafneBtn stays gated — it is the one of the four with no
+        // sendToTableIdeBtn stays gated — it is the one of the four with no
         // implementation behind it.
         $("#exportSqlBtn").on("click", () => window.editor.exportAsSqlDdl());
         $("#exportMermaidSeqBtn").on("click", () => window.editor.exportAsMermaidSequence());
@@ -1779,8 +1779,8 @@
         $("#exportXStateBtn").on("click", () => window.editor.exportAsXState());
         $("#exportMermaidErdBtn").on("click", () => window.editor.exportAsMermaidErd());
         $("#importMermaidErdBtn").on("click", () => window.editor.importMermaidErd());
-        $("#sendFsmToTafneBtn").on("click", () =>
-          window.editor.sendFsmToTafne(),
+        $("#sendFsmToTableIdeBtn").on("click", () =>
+          window.editor.sendFsmToTableIde(),
         );
         $("#sendSchemaAnnotationBtn").on("click", () =>
           window.editor.sendSchemaAnnotation(),
@@ -1791,10 +1791,10 @@
           GxGate.init({
             toolKey: "schema_export_count",
             tip: {
-              text: "This schematic can flow straight into TAFNE for verification — with full provenance, no re-export.",
-              cta: "Send to TAFNE →",
+              text: "This schematic can flow straight into Table IDE for verification — with full provenance, no re-export.",
+              cta: "Send to Table IDE →",
               featureSlug: "cross-tool-send",
-              subtitle: "Send schematic data to TAFNE for verification, or PDF regions in — with lineage intact. Cross-tool flow is a Pro feature.",
+              subtitle: "Send schematic data to Table IDE for verification, or PDF regions in — with lineage intact. Cross-tool flow is a Pro feature.",
             },
             triggerIds: [
               "exportViewBtn",
@@ -1803,12 +1803,12 @@
               "exportNetlistBtn",
               "exportFsmJsonBtn",
               "exportXStateBtn",
-              "sendFsmToTafneBtn",
+              "sendFsmToTableIdeBtn",
             ],
           });
         }
 
-        // CWS IPC: receive back-annotation from TAFNE (no-op when OS bridge absent)
+        // CWS IPC: receive back-annotation from Table IDE (no-op when OS bridge absent)
         if (window.CwsBridge) {
           CwsBridge.onData(function (envelope) {
             // Incoming lineage is recorded by an optional host-provided
@@ -1905,7 +1905,7 @@
           }, 150);
         }
 
-        // OS shell Send card (Pro) → gx:ipc-send. TAFNE route reuses the
+        // OS shell Send card (Pro) → gx:ipc-send. Table IDE route reuses the
         // existing netlist send pipeline; the PDF card launches the PDF tool
         // so its Analyze tab can send vector regions back here.
         window.addEventListener("message", function (e) {
@@ -1917,9 +1917,9 @@
           if (e.data.target === "tifany") {
             if (
               window.editor &&
-              typeof window.editor.sendNetlistToTafne === "function"
+              typeof window.editor.sendNetlistToTableIde === "function"
             ) {
-              window.editor.sendNetlistToTafne();
+              window.editor.sendNetlistToTableIde();
             }
           } else if (e.data.target === "pdf_processor" && window.CwsBridge) {
             window.CwsBridge.send(
@@ -1972,7 +1972,7 @@
                   (c.layer || "default");
               }
             }
-            //  / /domain addressing context (mirrors TAFNE  / /mode)
+            //  / /domain addressing context (mirrors Table IDE  / /mode)
             var _ed = window.editor;
             var _displays = ((_ed && _ed.displays) || []).map(function (d, i) {
               return {
@@ -2090,7 +2090,7 @@
     <script>
       var SCHEMA_PRO_COPY = {
         "ipc-schema-to-tafne":
-          "Send your Schema Editor netlist to TAFNE for BOM cleanup and export. Join the waitlist to get early access.",
+          "Send your Schema Editor netlist to Table IDE for BOM cleanup and export. Join the waitlist to get early access.",
         "schema-batch-export":
           "Batch export all loaded diagrams as SVG in one click. Join the waitlist to get early access.",
         "schema-export-sql":
@@ -2142,7 +2142,7 @@
           } else {
             openProWaitlist(
               "ipc-cross-tool",
-              "Send your Schema Editor netlist to TAFNE or Document Workbench. Cross-tool flow is a Pro feature.",
+              "Send your Schema Editor netlist to Table IDE or Document Workbench. Cross-tool flow is a Pro feature.",
             );
           }
         });

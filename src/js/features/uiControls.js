@@ -219,15 +219,15 @@ ${svgData}
         };
     },
 
-    // ── TAFNE Pipeline ───────────────────────────────────────────
+    // ── Table IDE Pipeline ───────────────────────────────────────────
     //
     //  Steps:
     //   0  Gather schema
     //   1  Check kernel heartbeat   (wake if sleeping)
-    //   2  Probe TAFNE              (is table-formatter running?)
-    //   3  Open TAFNE               (if not, ask kernel to launch it)
+    //   2  Probe Table IDE              (is table-formatter running?)
+    //   3  Open Table IDE               (if not, ask kernel to launch it)
     //   4  Store data               (kernel pointer store)
-    //   5  Deliver to TAFNE
+    //   5  Deliver to Table IDE
     //
     // ── Build ginexys-diagram-v2 payload (export + IPC send) ─────
     // v2 adds: meta, structure.groups, wire.path, wire.layer,
@@ -339,7 +339,7 @@ ${svgData}
         };
     },
 
-    async sendNetlistToTafne() {
+    async sendNetlistToTableIde() {
         // ── Build diagram payload (ginexys-diagram-v2) ─────────
         const diagram = this._buildDiagramPayload();
         const { components, wires } = diagram.topology;
@@ -358,7 +358,7 @@ ${svgData}
         }
 
         // ── Open pipeline modal ────────────────────────────────
-        const pipeline = this._openTafnePipeline();
+        const pipeline = this._openTableIdePipeline();
 
         try {
             // ── Step 0: Schema gathered ────────────────────────
@@ -380,23 +380,23 @@ ${svgData}
             }
             pipeline.step(1, 'done', 'Connected');
 
-            // ── Step 2: Probe TAFNE ────────────────────────────
+            // ── Step 2: Probe Table IDE ────────────────────────────
             pipeline.step(2, 'running', 'Probing Table Formatter…');
-            const tafneRunning = await this._cwsProbeTafne(3500);
+            const tableIdeRunning = await this._cwsProbeTableIde(3500);
             if (pipeline.cancelled) return;
 
-            // ── Step 3: Open TAFNE if not running ─────────────
-            if (tafneRunning) {
+            // ── Step 3: Open Table IDE if not running ─────────────
+            if (tableIdeRunning) {
                 pipeline.step(2, 'done', 'Already open');
                 pipeline.step(3, 'skipped', 'Not needed');
             } else {
                 pipeline.step(2, 'done', 'Not running');
-                pipeline.step(3, 'running', 'Requesting kernel to open TAFNE…');
+                pipeline.step(3, 'running', 'Requesting kernel to open Table IDE…');
                 CwsBridge.send('cws:tool:launch', { toolId: 'tifany', focusAfterLaunch: true }, 'os');
                 const launched = await this._cwsWaitForToolLaunch('tifany', 12000);
                 if (pipeline.cancelled) return;
                 pipeline.step(3, launched ? 'done' : 'running',
-                    launched ? 'TAFNE opened' : 'No ack — continuing anyway…');
+                    launched ? 'Table IDE opened' : 'No ack — continuing anyway…');
             }
 
             // ── Step 4: Store diagram ──────────────────────────
@@ -431,7 +431,7 @@ ${svgData}
             }));
             this._trackExport();
             pipeline.step(5, 'done',
-                `${components.length} components · ${wires.length} wires → TAFNE`);
+                `${components.length} components · ${wires.length} wires → Table IDE`);
             pipeline.success(`Sent ${components.length} components and ${wires.length} wires`);
 
         } catch (err) {
@@ -440,8 +440,8 @@ ${svgData}
     },
 
     // ── Pipeline modal factory ────────────────────────────────
-    _openTafnePipeline() {
-        $('#tafnePipelineModal').remove();
+    _openTableIdePipeline() {
+        $('#tableIdePipelineModal').remove();
 
         const STEPS = [
             'Gather schema',
@@ -449,30 +449,30 @@ ${svgData}
             'Probe Table Formatter',
             'Open Table Formatter',
             'Store data',
-            'Deliver to TAFNE',
+            'Deliver to Table IDE',
         ];
 
         const stepsHtml = STEPS.map((label, i) => `
-            <div class="tafne-step" data-idx="${i}" data-state="pending">
-                <div class="tafne-step-icon pending">○</div>
-                <div class="tafne-step-text">
-                    <span class="tafne-step-label">${label}</span>
-                    <span class="tafne-step-detail"></span>
+            <div class="table-ide-step" data-idx="${i}" data-state="pending">
+                <div class="table-ide-step-icon pending">○</div>
+                <div class="table-ide-step-text">
+                    <span class="table-ide-step-label">${label}</span>
+                    <span class="table-ide-step-detail"></span>
                 </div>
             </div>`).join('');
 
         const $modal = $(`
-            <div class="modal-backdrop open" id="tafnePipelineModal" role="dialog" aria-modal="true">
-                <div class="modal tafne-pipeline-modal">
+            <div class="modal-backdrop open" id="tableIdePipelineModal" role="dialog" aria-modal="true">
+                <div class="modal table-ide-pipeline-modal">
                     <h3 class="modal-title">
                         <iconify-icon icon="material-symbols:send-outline" style="font-size:16px;"></iconify-icon>
-                        Send to TAFNE
+                        Send to Table IDE
                     </h3>
-                    <div class="tafne-steps">${stepsHtml}</div>
-                    <div class="tafne-pipeline-footer info" id="tafnePipelineFooter">Initializing…</div>
+                    <div class="table-ide-steps">${stepsHtml}</div>
+                    <div class="table-ide-pipeline-footer info" id="tableIdePipelineFooter">Initializing…</div>
                     <div class="modal-actions">
-                        <button class="btn btn-ghost" id="tafnePipelineCancel">Cancel</button>
-                        <button class="btn btn-ghost" id="tafnePipelineClose" style="display:none;">Close</button>
+                        <button class="btn btn-ghost" id="tableIdePipelineCancel">Cancel</button>
+                        <button class="btn btn-ghost" id="tableIdePipelineClose" style="display:none;">Close</button>
                     </div>
                 </div>
             </div>`);
@@ -480,15 +480,15 @@ ${svgData}
         $('body').append($modal);
 
         // Set first step immediately to running
-        this._tafnePipelineStep(0, 'running', 'Building…');
+        this._tableIdePipelineStep(0, 'running', 'Building…');
 
         let _cancelled = false;
         let _currentRunningStep = -1;
-        $('#tafnePipelineCancel').on('click', () => {
+        $('#tableIdePipelineCancel').on('click', () => {
             _cancelled = true;
             $modal.remove();
         });
-        $('#tafnePipelineClose').on('click', () => $modal.remove());
+        $('#tableIdePipelineClose').on('click', () => $modal.remove());
 
         const self = this;
         return {
@@ -496,35 +496,35 @@ ${svgData}
             step(idx, state, detail) {
                 if (state === 'running') _currentRunningStep = idx;
                 else if (_currentRunningStep === idx) _currentRunningStep = -1;
-                self._tafnePipelineStep(idx, state, detail);
+                self._tableIdePipelineStep(idx, state, detail);
             },
             success(msg) {
-                $('#tafnePipelineFooter').text(`✓ ${msg}`).attr('class', 'tafne-pipeline-footer success');
-                $('#tafnePipelineCancel').hide();
-                $('#tafnePipelineClose').show();
+                $('#tableIdePipelineFooter').text(`✓ ${msg}`).attr('class', 'table-ide-pipeline-footer success');
+                $('#tableIdePipelineCancel').hide();
+                $('#tableIdePipelineClose').show();
                 setTimeout(() => $modal.remove(), 3000);
             },
             fail(msg) {
                 if (_currentRunningStep >= 0) {
-                    self._tafnePipelineStep(_currentRunningStep, 'error', msg);
+                    self._tableIdePipelineStep(_currentRunningStep, 'error', msg);
                     _currentRunningStep = -1;
                 }
-                $('#tafnePipelineFooter').text(`✗ ${msg}`).attr('class', 'tafne-pipeline-footer error');
-                $('#tafnePipelineCancel').hide();
-                $('#tafnePipelineClose').show();
+                $('#tableIdePipelineFooter').text(`✗ ${msg}`).attr('class', 'table-ide-pipeline-footer error');
+                $('#tableIdePipelineCancel').hide();
+                $('#tableIdePipelineClose').show();
             },
         };
     },
 
-    _tafnePipelineStep(idx, state, detail) {
-        const $step = $(`#tafnePipelineModal .tafne-step[data-idx="${idx}"]`);
+    _tableIdePipelineStep(idx, state, detail) {
+        const $step = $(`#tableIdePipelineModal .table-ide-step[data-idx="${idx}"]`);
         if (!$step.length) return;
         const ICONS = { pending: '○', running: '', done: '✓', error: '✗', skipped: '–' };
         $step.attr('data-state', state);
-        $step.find('.tafne-step-icon')
-            .attr('class', `tafne-step-icon ${state}`)
+        $step.find('.table-ide-step-icon')
+            .attr('class', `table-ide-step-icon ${state}`)
             .text(ICONS[state] ?? '○');
-        if (detail != null) $step.find('.tafne-step-detail').text(detail);
+        if (detail != null) $step.find('.table-ide-step-detail').text(detail);
     },
 
     // ── CWS helpers ───────────────────────────────────────────
@@ -542,7 +542,7 @@ ${svgData}
 
     // Sends cws:tool:probe to the kernel and waits for cws:tool:probe-result.
     // If kernel does not support the message type, resolves false after timeout.
-    _cwsProbeTafne(timeout) {
+    _cwsProbeTableIde(timeout) {
         return new Promise(resolve => {
             let resolved = false;
             const probeId = typeof crypto !== 'undefined' ? crypto.randomUUID() : `probe_${Date.now()}`;
@@ -596,7 +596,7 @@ ${svgData}
         });
     },
 
-    // Generic tables → TAFNE send. tables = [{ name, rows: [{...}], candidate? }]
+    // Generic tables → Table IDE send. tables = [{ name, rows: [{...}], candidate? }]
     // (flat rows-of-objects — the shape buildBom/ERC findings already produce).
     // Reuses the netlist pipeline's probe/launch plumbing; standalone → JSON download.
     // Sent through window.GxTables (root-injected, private — see assets/os/tables.js)
@@ -606,7 +606,7 @@ ${svgData}
     // at all. Falls back to the legacy flat envelope for a forked standalone tool,
     // which never gets tables.js injected — same degrade-gracefully pattern as
     // every other GxThing guard in this file.
-    async sendTablesToTafne(tables, title = 'tables') {
+    async sendTablesToTableIde(tables, title = 'tables') {
         if (!tables?.length || !tables.some(t => t.rows?.length)) {
             this.showToast('Nothing to send', 'error');
             return;
@@ -642,7 +642,7 @@ ${svgData}
             return;
         }
         try {
-            const running = await this._cwsProbeTafne(3500);
+            const running = await this._cwsProbeTableIde(3500);
             if (!running) {
                 CwsBridge.send('cws:tool:launch', { toolId: 'tifany', focusAfterLaunch: true }, 'os');
                 await this._cwsWaitForToolLaunch('tifany', 12000);
@@ -654,7 +654,7 @@ ${svgData}
                 metadata: { source: 'schema-editor', title, tableCount: tables.length },
                 hints: { suggestedTarget: 'tifany', action: 'load-tables' },
             }));
-            this.showToast(`Sent ${tables.length} table${tables.length > 1 ? 's' : ''} to TAFNE`, 'success');
+            this.showToast(`Sent ${tables.length} table${tables.length > 1 ? 's' : ''} to Table IDE`, 'success');
         } catch (err) {
             this.showToast(`Send failed: ${err.message || err}`, 'error');
         }
@@ -1009,7 +1009,7 @@ ${svgData}
         return vb.length === 4 ? +vb[3] : 0;
     },
 
-    // Incoming table (BOM/sheet) from TAFNE or another tool's Send. Schema has
+    // Incoming table (BOM/sheet) from Table IDE or another tool's Send. Schema has
     // no generic "insert an arbitrary table onto the canvas" primitive — that's
     // a real feature, not a wiring fix — so this is deliberately a READ-ONLY
     // preview: honest about landing, honest about not being inserted, instead
@@ -1121,7 +1121,7 @@ ${svgData}
 
         // `general` is the default nobody has changed yet, not a domain with its
         // own reading of a table — and it is the mode the editor boots into, so
-        // it is what a table sent from TAFNE lands in unless the user happened
+        // it is what a table sent from Table IDE lands in unless the user happened
         // to pick Software first. Refusing there produced the reported dead end:
         // "reference only, not inserted onto the canvas", with no hint that the
         // feature exists one pill away. A table's structural reading IS the
@@ -1277,10 +1277,10 @@ ${svgData}
 
     // Place a GxSchema model on the canvas: one generated ENTITY per entity,
     // one wire per fk relation, one undo step, and the model retained as the
-    // source of truth. Shared by promotion (TAFNE) and Mermaid import, so the
+    // source of truth. Shared by promotion (Table IDE) and Mermaid import, so the
     // two paths cannot drift into placing entities differently.
     /**
-     * A pipeline graph from TAFNE — `gx-pipeline/1`.
+     * A pipeline graph from Table IDE — `gx-pipeline/1`.
      *
      * The rows a pipeline computed carry its RESULT; the node configs carry its
      * EVIDENCE. A vlookup's `{keyPort, refNodeId, refKeyPort}` is a foreign key
@@ -1320,7 +1320,7 @@ ${svgData}
             this.showToast('Pipeline import failed: ' + (e && e.message), 'error');
             return;
         }
-        this._openPipelinePreviewModal(batch, envelope.metadata?.source || 'TAFNE');
+        this._openPipelinePreviewModal(batch, envelope.metadata?.source || 'Table IDE');
     },
 
     _openPipelinePreviewModal(batch, source) {
@@ -1702,7 +1702,7 @@ ${svgData}
                     <div class="ba-row">
                         <span class="ba-tag removed">del</span>
                         <span class="ba-desc"><strong>${ch.component.refdes || ch.component.id}</strong>
-                        removed in TAFNE</span>
+                        removed in Table IDE</span>
                     </div>`;
                 if (ch.kind === 'type_changed') return `
                     <div class="ba-row">
@@ -1719,7 +1719,7 @@ ${svgData}
                 <div class="modal ba-modal">
                     <h3 class="modal-title">
                         <iconify-icon icon="material-symbols:undo" style="font-size:16px;"></iconify-icon>
-                        Back-Annotate from TAFNE
+                        Back-Annotate from Table IDE
                     </h3>
                     <p class="ba-summary">
                         ${nSafe + nReview} change${nSafe + nReview !== 1 ? 's' : ''} ·
@@ -1780,7 +1780,7 @@ ${svgData}
             // the modal, and nothing happened. Verified in a real browser
             // 2026-08-14g.
             //
-            // The netlist deliberately keeps emitting the internal id (TAFNE's
+            // The netlist deliberately keeps emitting the internal id (Table IDE's
             // sheets, get_netlist and the MCP surface all key on it), so the
             // fix belongs here: look the component up the way the rest of the
             // editor does, and fall back to refdes for a netlist that came from
@@ -1959,7 +1959,7 @@ ${svgData}
     },
 
     /**
-     * Send the schema's edits back to TAFNE — `gx-schema-annotation/1`.
+     * Send the schema's edits back to Table IDE — `gx-schema-annotation/1`.
      *
      * The closing edge of the loop. A table came from a sheet, was promoted
      * into entities, was edited here, and the edit now goes back to the cell it
@@ -1984,7 +1984,7 @@ ${svgData}
         if (!basis) {
             // Without a basis there is nothing to diff against, and diffing
             // against a fresh canvas read would report the whole schema as new.
-            this.showToast('Nothing to send back — this schema was not promoted from TAFNE', 'error');
+            this.showToast('Nothing to send back — this schema was not promoted from Table IDE', 'error');
             return;
         }
         const current = this._schemaModel || this._modelFromCanvas();
@@ -2020,7 +2020,7 @@ ${svgData}
             this.showToast(
                 `Sent ${env.edits.length} edit${env.edits.length !== 1 ? 's' : ''}` +
                 (env.notes.length ? ` and ${env.notes.length} note${env.notes.length !== 1 ? 's' : ''}` : '') +
-                ' → TAFNE', 'success');
+                ' → Table IDE', 'success');
         } catch (e) {
             this.showToast('Send failed: ' + (e && e.message), 'error');
         }
@@ -2236,7 +2236,7 @@ ${svgData}
         this.showToast(`XState machine exported`, 'success');
     },
 
-    async sendFsmToTafne() {
+    async sendFsmToTableIde() {
         const fsm = this.buildFsmJson();
         if (!fsm?.states.length) { this.showToast('No states on canvas', 'error'); return; }
 
@@ -2251,14 +2251,14 @@ ${svgData}
             return;
         }
         try {
-            this.showToast('Sending FSM to TAFNE…', 'success');
+            this.showToast('Sending FSM to Table IDE…', 'success');
             // A state machine crosses as two TABLES — states and transitions —
             // rather than as a bespoke `load-fsm` action.
             //
             // This button used to send `action: 'load-fsm'`, and no receiver in
-            // TAFNE has ever compared against that name. The send reported
-            // success and nothing arrived. TAFNE's model is sheets, so the fix
-            // is not a new receiver branch: it is sending the shape TAFNE
+            // Table IDE has ever compared against that name. The send reported
+            // success and nothing arrived. Table IDE's model is sheets, so the fix
+            // is not a new receiver branch: it is sending the shape Table IDE
             // already knows how to open. Two sheets is also the honest reading —
             // a transition table is what you sort, filter and check for
             // unreachable states in.
@@ -2277,7 +2277,7 @@ ${svgData}
             this._trackExport();
             this.showToast(
                 `Sent ${fsm.states.length} state${fsm.states.length !== 1 ? 's' : ''} and ` +
-                `${fsm.transitions.length} transition${fsm.transitions.length !== 1 ? 's' : ''} → TAFNE`,
+                `${fsm.transitions.length} transition${fsm.transitions.length !== 1 ? 's' : ''} → Table IDE`,
                 'success');
         } catch (e) {
             this.showToast('Send failed: ' + e.message, 'error');

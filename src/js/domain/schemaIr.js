@@ -212,7 +212,7 @@
      *   page + regionId   a table extracted from a PDF. Region ids restart per
      *                     page, so a regionId alone resolves to whichever page
      *                     comes first — both halves are required together.
-     *   sheetId (+nodeId) a node or sheet in TAFNE. The sheet id is already
+     *   sheetId (+nodeId) a node or sheet in Table IDE. The sheet id is already
      *                     unique; there is no page to qualify it with.
      *
      * `sheetId` and `nodeId` were dropped by this normaliser while the pipeline
@@ -262,7 +262,7 @@
         }
         // Two valid forms, and a PARTIAL of either is refused. The PDF form
         // needs both halves because region ids repeat across pages, so either
-        // alone resolves to the wrong table silently. The TAFNE form needs only
+        // alone resolves to the wrong table silently. The Table IDE form needs only
         // the sheet id, which is already unique.
         var pdfForm = originVal.page != null && originVal.regionId != null;
         var sheetForm = originVal.sheetId != null;

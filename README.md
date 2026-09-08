@@ -27,7 +27,7 @@ Most web-based drawing tools are either generic (Figma/Canva) or overly complex 
 *   **Precision Snapping**: Intelligent grid and object snapping for pixel-perfect engineering.
 *   **Layer Management**: Full control over visibility, locking, and stacking order.
 *   **Measurement System**: Calibrated system supporting both Metric and Imperial units.
-*   **Multi-Format Export**: Save as SVG, PDF, HPGL, JSON, or export netlists directly to [TAFNE](https://github.com/carnworkstudios/TAFNE).
+*   **Multi-Format Export**: Save as SVG, PDF, HPGL, JSON, or export netlists directly to [Table IDE](https://github.com/carnworkstudios/table-ide).
 
 ---
 

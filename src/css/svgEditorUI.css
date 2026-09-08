@@ -32,9 +32,9 @@ body {
 }
 
 /* ============================================================
-   TIFANY-style Header; light default, let TIFANY CSS lead
+   TABLE_IDE-style Header; light default, let TABLE_IDE CSS lead
    ============================================================ */
-.tifany-header {
+.table-ide-header {
     z-index: 1000;
     display: flex;
     justify-content: space-between;
@@ -42,20 +42,20 @@ body {
     padding: 0 16px;
 }
 
-.tifany-header .logo h1 a {
+.table-ide-header .logo h1 a {
     color: #0066cc;
     text-decoration: none;
 }
 
-.tifany-header .logo h1 {
+.table-ide-header .logo h1 {
     color: #0066cc;
 }
 
-.tifany-header .logo-accent {
+.table-ide-header .logo-accent {
     color: #0099dd;
 }
 
-.tifany-header .tool-subtitle {
+.table-ide-header .tool-subtitle {
     display: block;
     font-size: 10px;
     color: rgba(0, 0, 0, 0.45);
@@ -65,7 +65,7 @@ body {
     text-align: center;
 }
 
-.tifany-header .nav-link {
+.table-ide-header .nav-link {
     color: rgba(0, 0, 0, 0.55);
     font-size: 13px;
     padding: 5px 10px;
@@ -74,12 +74,12 @@ body {
     transition: all 150ms ease;
 }
 
-.tifany-header .nav-link:hover {
+.table-ide-header .nav-link:hover {
     color: rgba(0, 0, 0, 0.9);
     background: rgba(0, 0, 0, 0.06);
 }
 
-.tifany-header .theme-toggle-btn {
+.table-ide-header .theme-toggle-btn {
     background: none;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 6px;
@@ -95,7 +95,7 @@ body {
     flex-shrink: 0;
 }
 
-.tifany-header .theme-toggle-btn:hover {
+.table-ide-header .theme-toggle-btn:hover {
     background: rgba(0, 0, 0, 0.06);
     color: #1a1a1a;
 }
@@ -984,40 +984,40 @@ body.dark-mode {
     color: white;
 }
 
-body.dark-mode .tifany-header {
+body.dark-mode .table-ide-header {
     background: rgba(18, 18, 18, 0.97) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(10px);
 }
 
-body.dark-mode .tifany-header .logo h1 a,
-body.dark-mode .tifany-header .logo h1 {
+body.dark-mode .table-ide-header .logo h1 a,
+body.dark-mode .table-ide-header .logo h1 {
     color: #4facfe;
 }
 
-body.dark-mode .tifany-header .logo-accent {
+body.dark-mode .table-ide-header .logo-accent {
     color: #00f2fe;
 }
 
-body.dark-mode .tifany-header .tool-subtitle {
+body.dark-mode .table-ide-header .tool-subtitle {
     color: rgba(255, 255, 255, 0.45);
 }
 
-body.dark-mode .tifany-header .nav-link {
+body.dark-mode .table-ide-header .nav-link {
     color: rgba(255, 255, 255, 0.55) !important;
 }
 
-body.dark-mode .tifany-header .nav-link:hover {
+body.dark-mode .table-ide-header .nav-link:hover {
     color: rgba(255, 255, 255, 0.9) !important;
     background: rgba(255, 255, 255, 0.07) !important;
 }
 
-body.dark-mode .tifany-header .theme-toggle-btn {
+body.dark-mode .table-ide-header .theme-toggle-btn {
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     color: rgba(255, 255, 255, 0.6) !important;
 }
 
-body.dark-mode .tifany-header .theme-toggle-btn:hover {
+body.dark-mode .table-ide-header .theme-toggle-btn:hover {
     background: rgba(255, 255, 255, 0.08) !important;
     color: white !important;
 }
@@ -1909,20 +1909,20 @@ body.dark-mode .draw-tool-btn.active {
 }
 
 /* ============================================================
-   TAFNE Pipeline Modal
+   Table IDE Pipeline Modal
    ============================================================ */
 
-.tafne-pipeline-modal {
+.table-ide-pipeline-modal {
     max-width: 400px;
 }
 
-.tafne-steps {
+.table-ide-steps {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.tafne-step {
+.table-ide-step {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -1930,15 +1930,15 @@ body.dark-mode .draw-tool-btn.active {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-body:not(.dark-mode) .tafne-step {
+body:not(.dark-mode) .table-ide-step {
     border-bottom-color: rgba(0, 0, 0, 0.06);
 }
 
-.tafne-step:last-child {
+.table-ide-step:last-child {
     border-bottom: none;
 }
 
-.tafne-step-icon {
+.table-ide-step-icon {
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -1951,73 +1951,73 @@ body:not(.dark-mode) .tafne-step {
     margin-top: 1px;
 }
 
-.tafne-step-icon.pending {
+.table-ide-step-icon.pending {
     color: rgba(255, 255, 255, 0.25);
 }
 
-.tafne-step-icon.done {
+.table-ide-step-icon.done {
     color: #34d399;
 }
 
-.tafne-step-icon.error {
+.table-ide-step-icon.error {
     color: #ef4444;
 }
 
-.tafne-step-icon.skipped {
+.table-ide-step-icon.skipped {
     color: rgba(255, 255, 255, 0.2);
 }
 
-body:not(.dark-mode) .tafne-step-icon.pending {
+body:not(.dark-mode) .table-ide-step-icon.pending {
     color: rgba(0, 0, 0, 0.2);
 }
 
-.tafne-step-icon.running {
+.table-ide-step-icon.running {
     position: relative;
     color: transparent;
 }
 
-.tafne-step-icon.running::after {
+.table-ide-step-icon.running::after {
     content: '';
     position: absolute;
     inset: 2px;
     border-radius: 50%;
     border: 2px solid rgba(79, 172, 254, 0.25);
     border-top-color: #4facfe;
-    animation: tafne-spin 0.7s linear infinite;
+    animation: table-ide-spin 0.7s linear infinite;
 }
 
-@keyframes tafne-spin {
+@keyframes table-ide-spin {
     to {
         transform: rotate(360deg);
     }
 }
 
-.tafne-step-text {
+.table-ide-step-text {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
 }
 
-.tafne-step-label {
+.table-ide-step-label {
     font-size: 12px;
     color: inherit;
     line-height: 1.4;
 }
 
-.tafne-step[data-state="pending"] .tafne-step-label {
+.table-ide-step[data-state="pending"] .table-ide-step-label {
     opacity: 0.4;
 }
 
-.tafne-step[data-state="done"] .tafne-step-label {
+.table-ide-step[data-state="done"] .table-ide-step-label {
     color: #34d399;
 }
 
-.tafne-step[data-state="error"] .tafne-step-label {
+.table-ide-step[data-state="error"] .table-ide-step-label {
     color: #ef4444;
 }
 
-.tafne-step-detail {
+.table-ide-step-detail {
     font-size: 10px;
     color: rgba(255, 255, 255, 0.4);
     white-space: nowrap;
@@ -2025,29 +2025,29 @@ body:not(.dark-mode) .tafne-step-icon.pending {
     text-overflow: ellipsis;
 }
 
-body:not(.dark-mode) .tafne-step-detail {
+body:not(.dark-mode) .table-ide-step-detail {
     color: rgba(0, 0, 0, 0.4);
 }
 
-.tafne-pipeline-footer {
+.table-ide-pipeline-footer {
     font-size: 11px;
     padding: 6px 4px 0;
     min-height: 18px;
     font-style: italic;
 }
 
-.tafne-pipeline-footer.success {
+.table-ide-pipeline-footer.success {
     color: #34d399;
     font-style: normal;
     font-weight: 600;
 }
 
-.tafne-pipeline-footer.error {
+.table-ide-pipeline-footer.error {
     color: #ef4444;
     font-style: normal;
 }
 
-.tafne-pipeline-footer.info {
+.table-ide-pipeline-footer.info {
     color: rgba(255, 255, 255, 0.45);
 }
 
