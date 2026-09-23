@@ -6,11 +6,11 @@
 <title>GinexysEngine — Standalone Engine Reference | GINEXYS</title>
 <meta name="description" content="API reference for GinexysEngine: PDFGeometryEngine for vector topology analysis, KDTree2D and QuadTree2D spatial indexes, and CameraMatrix. Worker-safe engines for PDF extraction and diagram analysis.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://ginexys.com/tools/schema-editor/docs/engine/">
+<link rel="canonical" href="%%SITE%%/tools/schema-editor/docs/engine/">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GinexysEngine — Standalone Engine Reference | GINEXYS">
 <meta property="og:description" content="API reference for GinexysEngine: PDFGeometryEngine, KDTree2D, QuadTree2D, and CameraMatrix.">
-<meta property="og:url" content="https://ginexys.com/tools/schema-editor/docs/engine/">
+<meta property="og:url" content="%%SITE%%/tools/schema-editor/docs/engine/">
 <meta property="og:site_name" content="GINEXYS">
 <script type="application/ld+json">
 {
@@ -20,26 +20,26 @@
       "@type": "TechArticle",
       "headline": "GinexysEngine — Standalone Engine Reference",
       "description": "API reference for GinexysEngine: PDFGeometryEngine, KDTree2D, QuadTree2D, CameraMatrix.",
-      "url": "https://ginexys.com/tools/schema-editor/docs/engine/",
+      "url": "%%SITE%%/tools/schema-editor/docs/engine/",
       "isPartOf": {
         "@type": "WebApplication",
-        "name": "Schema Editor",
-        "url": "https://ginexys.com/tools/schema-editor/"
+        "name": "Construct",
+        "url": "%%SITE%%/tools/schema-editor/"
       },
       "publisher": {
         "@type": "Organization",
         "name": "GINEXYS",
-        "url": "https://ginexys.com"
+        "url": "%%SITE%%"
       },
       "dateModified": "2026-05-07"
     },
     {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "GINEXYS", "item": "https://ginexys.com/" },
-        { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://ginexys.com/tools/" },
-        { "@type": "ListItem", "position": 3, "name": "Schema Editor", "item": "https://ginexys.com/tools/schema-editor/" },
-        { "@type": "ListItem", "position": 4, "name": "Docs", "item": "https://ginexys.com/tools/schema-editor/docs/getting-started.html" },
+        { "@type": "ListItem", "position": 1, "name": "GINEXYS", "item": "%%SITE%%/" },
+        { "@type": "ListItem", "position": 2, "name": "Tools", "item": "%%SITE%%/tools/" },
+        { "@type": "ListItem", "position": 3, "name": "Construct", "item": "%%SITE%%/tools/schema-editor/" },
+        { "@type": "ListItem", "position": 4, "name": "Docs", "item": "%%SITE%%/tools/schema-editor/docs/getting-started.html" },
         { "@type": "ListItem", "position": 5, "name": "Engine Reference" }
       ]
     }
@@ -102,7 +102,7 @@ body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Courier New',mo
   <ol class="gx-breadcrumb">
     <li><a href="/">GINEXYS</a></li>
     <li><a href="/#tools/">Tools</a></li>
-    <li><a href="/tools/schema-editor/">Schema Editor</a></li>
+    <li><a href="/tools/schema-editor/">Construct</a></li>
     <li><a href="/tools/schema-editor/docs/getting-started.html">Docs</a></li>
     <li aria-current="page">Engine Reference</li>
   </ol>
@@ -113,7 +113,7 @@ body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Courier New',mo
 
 <h1>GinexysEngine — Standalone Engine Reference</h1>
 
-<p><code>GinexysEngine</code> is the computation layer extracted from the Schema Editor and exposed as a standalone namespace. The engines below run independently of the diagram UI — no SVG canvas, no editor state required.</p>
+<p><code>GinexysEngine</code> is the computation layer extracted from Construct and exposed as a standalone namespace. The engines below run independently of the diagram UI — no SVG canvas, no editor state required.</p>
 
 <pre><code>window.GinexysEngine = {
   PDFGeometryEngine, // vector topology engine  — worker-safe
@@ -309,7 +309,7 @@ qt.query(px, py);
 
 <h2 id="camera-matrix">CameraMatrix <span class="pill pill-amber">browser · main-thread</span></h2>
 
-<p>Pan/zoom/rotate math for SVG canvas views. Manages the current camera transform (translate, scale, rotation) and converts between screen-space and world-space coordinates. Used by the Schema Editor canvas but extractable for any SVG viewport implementation.</p>
+<p>Pan/zoom/rotate math for SVG canvas views. Manages the current camera transform (translate, scale, rotation) and converts between screen-space and world-space coordinates. Used by Construct canvas but extractable for any SVG viewport implementation.</p>
 
 <pre><code>const cam = new GinexysEngine.CameraMatrix();
 

@@ -1854,35 +1854,38 @@ body.dark-mode .btn:disabled {
     scrollbar-width: none;
 }
 
-/* ── Fix #4: Mode switcher — mobile responsive dropdown ─────── */
-/* Desktop: show pills, hide select */
-.mode-switcher-select {
-    display: none;
+/* ── Mode switcher — one dropdown at every width ──────────────
+   The pill row cost 612px of the header and grew with every new mode, which
+   crowded the 3D workspace button and meant the control looked different on
+   desktop and mobile. A single select is the same control everywhere and
+   scales to any number of modes. The pills stay in the DOM because the mode
+   handlers sync `.mode-pill.active`; they are simply never shown. */
+.mode-switcher {
+    display: none !important;
 }
 
-/* Mobile (<= 640px): hide pills, show native select */
+.mode-switcher-select {
+    display: block;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(79, 172, 254, 0.35);
+    border-radius: 8px;
+    background: rgba(79, 172, 254, 0.1);
+    color: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    min-width: 180px;
+}
+
+body.dark-mode .mode-switcher-select {
+    background: rgba(79, 172, 254, 0.18);
+    border-color: rgba(79, 172, 254, 0.5);
+    color: #4facfe;
+}
+
 @media (max-width: 740px) {
-    .mode-switcher {
-        display: none !important;
-    }
-
-    .mode-switcher-select {
-        display: block;
-        padding: 4px 8px;
-        font-size: 12px;
-        border: 1px solid rgba(79, 172, 254, 0.35);
-        border-radius: 8px;
-        background: rgba(79, 172, 254, 0.1);
-        color: inherit;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
-
-    body.dark-mode .mode-switcher-select {
-        background: rgba(79, 172, 254, 0.18);
-        border-color: rgba(79, 172, 254, 0.5);
-        color: #4facfe;
-    }
+    .mode-switcher-select { min-width: 0; max-width: 150px; }
 
     /* Secondary toolbar wraps on mobile */
     .custom-bar.header-right .header-right {
@@ -2798,21 +2801,87 @@ body.dark-mode #canvasFirstRunHint {
 /* ============================================================
    Contextual command rail — tool settings + selection actions
    ============================================================ */
+/* Vertical rail on the LEFT EDGE, overlaying the canvas margin.
+   Two earlier placements were wrong: fixed at left:50%/bottom:112px put a
+   permanent pill in the middle of the drawing surface, and docking it under
+   the toolbar reflowed the canvas down — trading occlusion for permanent lost
+   height, which is worse on a short or mobile viewport.
+   The canvas is wider than the artboard, so the left margin is dead space.
+   A narrow icon column there overlays nothing that is drawn on, costs zero
+   canvas height, and matches #symbolPalettePanel, the existing overlay. */
 .gx-context-rail {
     position: fixed;
-    left: 50%;
-    bottom: 112px;
+    /* Rides beside #symbolPalettePanel rather than under it. The palette is a
+       190px drawer whose own toggle shifts to left:190px when open, so the rail
+       follows the same offset and stays reachable instead of being buried. */
+    left: 34px;
+    top: 50%;
+    transition: left .25s cubic-bezier(.4, 0, .2, 1);
     z-index: 910;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 7px;
-    transform: translateX(-50%);
-    max-width: min(92vw, 980px);
+    align-items: flex-start;
+    gap: 6px;
+    transform: translateY(-50%);
+    max-height: calc(100vh - 220px);
     color: #172033;
     font: 600 11px/1.2 'Segoe UI', sans-serif;
     pointer-events: none;
 }
+/* Nothing to configure and nothing selected: take up no space at all rather
+   than parking an empty "Choose a tool" pill on the canvas. */
+.gx-context-rail.is-idle { display: none; }
+/* body.palette-open is set alongside #symbolPalettePanel.open. */
+body.palette-open .gx-context-rail { left: 224px; } /* 214px panel + 10px */
+
+/* Vertical stacking: the rail is a column of icon buttons, so labels collapse
+   and the row-oriented dividers turn horizontal. */
+.gx-context-rail .gx-context-tool,
+.gx-context-rail .gx-selection-actions {
+    flex-direction: column;
+    align-items: stretch;
+    /* Both panels share the column's width so the stack reads as one rail
+       rather than two ragged boxes. */
+    width: 96px;
+    max-height: inherit;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+/* The selection count is a badge, not a full-width block. */
+.gx-context-rail .gx-selection-count { justify-self: center; margin: 0 auto 2px; }
+.gx-context-rail .gx-context-tool::-webkit-scrollbar,
+.gx-context-rail .gx-selection-actions::-webkit-scrollbar { display: none; }
+.gx-context-rail .gx-rail-divider { width: 100%; height: 1px; margin: 2px 0; }
+/* Buttons are icon-only (their label rides in the tooltip), but INPUTS keep a
+   caption: a bare colour swatch and a bare "2" give no clue which is stroke,
+   which is fill, and which is width. The caption sits above the control as a
+   small cap-label so the column stays narrow. */
+.gx-context-rail .gx-rail-btn { justify-content: center; padding: 6px; }
+.gx-context-rail .gx-rail-btn > span,
+.gx-context-rail .gx-rail-identity small { display: none; }
+.gx-context-rail .gx-rail-field,
+.gx-context-rail .gx-rail-color,
+.gx-context-rail .gx-rail-select {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+}
+.gx-context-rail .gx-rail-field > span,
+.gx-context-rail .gx-rail-color > span,
+.gx-context-rail .gx-rail-select > span {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    opacity: .62;
+}
+.gx-context-rail .gx-rail-identity { justify-content: center; padding: 2px 0 4px; }
+.gx-context-rail .gx-rail-identity strong { font-size: 10px; text-align: center; }
+.gx-context-rail .gx-rail-field input { width: 100%; }
+.gx-context-rail .gx-rail-color input { width: 100%; }
+.gx-context-rail .gx-rail-select select { max-width: 100%; width: 100%; padding: 0 4px; }
+
 .gx-context-tool,
 .gx-selection-actions {
     display: flex;
@@ -2823,8 +2892,9 @@ body.dark-mode #canvasFirstRunHint {
     border: 1px solid rgba(36, 51, 74, .18);
     border-radius: 10px;
     background: rgba(250, 252, 255, .94);
-    box-shadow: 0 10px 32px rgba(22, 35, 58, .16), 0 1px 0 rgba(255,255,255,.9) inset;
-    backdrop-filter: blur(16px) saturate(1.25);
+    /* Docked, not floating: a heavy lift shadow here reads as noise against
+       the toolbar it now belongs to. */
+    box-shadow: 0 1px 2px rgba(22, 35, 58, .07), 0 1px 0 rgba(255,255,255,.9) inset;
     pointer-events: auto;
     white-space: nowrap;
 }
@@ -2910,14 +2980,35 @@ body.dark-mode .gx-context-rail { color: #e8edf5; }
 body.dark-mode .gx-context-tool,
 body.dark-mode .gx-selection-actions,
 body.dark-mode .gx-context-menu { background: rgba(20, 27, 39, .95); border-color: rgba(255,255,255,.13); box-shadow: 0 14px 38px rgba(0,0,0,.38); }
+/* The menu is a true popover and keeps its lift; the docked rail does not. */
+body.dark-mode .gx-context-tool,
+body.dark-mode .gx-selection-actions { box-shadow: 0 1px 2px rgba(0,0,0,.22); }
 body.dark-mode .gx-rail-field input,
 body.dark-mode .gx-rail-select select,
 body.dark-mode .gx-rail-color input { background: #111827; color: #e8edf5; border-color: rgba(255,255,255,.14); }
 body.dark-mode .gx-rail-divider { background: rgba(255,255,255,.13); }
 
 @media (max-width: 760px) {
-    .gx-context-rail { left: 8px; right: 8px; bottom: 86px; max-width: none; transform: none; align-items: stretch; }
-    .gx-context-tool, .gx-selection-actions { overflow-x: auto; justify-content: flex-start; }
+    /* 36px clears the 31px palette toggle. When the palette is open the rail
+       follows its ACTUAL width, which blueprintShell narrows to min(78vw,260px)
+       under 640px — a fixed offset here would leave the rail underneath it. */
+    .gx-context-rail { left: 36px; }
+    body.palette-open .gx-context-rail { left: calc(min(78vw, 260px) + 10px); }
+    /* Same left column, narrowed to an icon strip. It stays vertical on mobile
+       because a horizontal bar would span the full width and cover the
+       artboard — the scarcest dimension on a phone.
+       Width drops to 44px: on a 390px screen a 96px column is a quarter of the
+       viewport, so captions are dropped here and the tooltip carries the name. */
+    .gx-context-rail { max-height: calc(100dvh - 180px); gap: 4px; }
+    .gx-context-rail .gx-context-tool,
+    .gx-context-rail .gx-selection-actions { width: 44px; padding: 4px; }
+    .gx-context-rail .gx-rail-field > span,
+    .gx-context-rail .gx-rail-color > span,
+    .gx-context-rail .gx-rail-select > span,
+    .gx-context-rail .gx-rail-identity { display: none; }
+    .gx-context-rail .gx-rail-field input { padding: 0 2px; text-align: center; }
+    .gx-context-rail .gx-rail-select select { padding: 0 2px; font-size: 10px; }
+    .gx-context-rail .gx-rail-color input { height: 26px; }
     .gx-rail-btn span, .gx-rail-field > span, .gx-rail-color > span, .gx-rail-select > span { display: none; }
 }
 

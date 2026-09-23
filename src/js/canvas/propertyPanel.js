@@ -8,11 +8,15 @@ Object.assign(MobileSVGEditor.prototype, {
 
     initPropertyPanel() {
         this._propPanelTarget = null;
-        this._activeSidePanelTab = 'layers';  // Layers is default; persists across selections
+        // Layers is the default, but a deliberate choice is remembered: someone
+        // working in Layers should not be returned to Properties every session.
+        let saved = null;
+        try { saved = localStorage.getItem('gx-side-panel-tab'); } catch (_) {}
+        this._activeSidePanelTab = saved === 'properties' ? 'properties' : 'layers';
         this._buildPropertyPanelHTML();
         this._bindPropertyPanelEvents();
         // Apply initial tab state so viewControlsGroup is hidden on the Layers tab
-        this._switchSidePanelTab('layers');
+        this._switchSidePanelTab(this._activeSidePanelTab);
     },
 
     // ── Helper to find the visual shape inside a component group ──
@@ -28,6 +32,11 @@ Object.assign(MobileSVGEditor.prototype, {
     // ── Helper to deep-apply visual styles to all nested shapes ──
     _applyStyle(el, attr, val) {
         const target = this._getVisualTarget(el);
+        if (attr === 'fill' && !this._isFillableElement?.(target)) {
+            target.setAttribute('fill', 'none');
+            target.removeAttribute('fill-opacity');
+            return;
+        }
         // Apply to the top-level visual target
         if (val === null) target.removeAttribute(attr);
         else target.setAttribute(attr, val);
@@ -40,7 +49,9 @@ Object.assign(MobileSVGEditor.prototype, {
                 if (shape.classList.contains('component-hitbox') || shape.classList.contains('wire-hitbox')) return;
                 if (shape.getAttribute('data-locked') === 'true') return;
                 
-                if (val === null) shape.removeAttribute(attr);
+                if (attr === 'fill' && !this._isFillableElement?.(shape)) {
+                    shape.setAttribute('fill', 'none'); shape.removeAttribute('fill-opacity');
+                } else if (val === null) shape.removeAttribute(attr);
                 else shape.setAttribute(attr, val);
             });
         }
@@ -110,21 +121,23 @@ Object.assign(MobileSVGEditor.prototype, {
                 </label>
             </div>
 
-            <!-- Fill -->
-            <div class="prop-section-label">Fill</div>
-            <div class="prop-grid-2">
-                <label class="prop-label">Color
-                    <div class="prop-color-wrap">
-                        <input type="color" id="prop-fill-color" class="prop-color" value="#4facfe">
-                        <span id="prop-fill-hex" class="prop-color-hex">#4facfe</span>
-                    </div>
-                </label>
-                <label class="prop-label">Opacity
-                    <input type="range" id="prop-fill-opacity" class="prop-slider" min="0" max="1" step="0.05" value="0">
-                </label>
-            </div>
-            <div class="prop-row">
-                <button class="btn prop-no-fill-btn" id="prop-no-fill">No Fill</button>
+            <!-- Fill: only closed geometry has an interior to paint. -->
+            <div id="prop-fill-group">
+                <div class="prop-section-label">Fill</div>
+                <div class="prop-grid-2">
+                    <label class="prop-label">Color
+                        <div class="prop-color-wrap">
+                            <input type="color" id="prop-fill-color" class="prop-color" value="#4facfe">
+                            <span id="prop-fill-hex" class="prop-color-hex">#4facfe</span>
+                        </div>
+                    </label>
+                    <label class="prop-label">Opacity
+                        <input type="range" id="prop-fill-opacity" class="prop-slider" min="0" max="1" step="0.05" value="0">
+                    </label>
+                </div>
+                <div class="prop-row">
+                    <button class="btn prop-no-fill-btn" id="prop-no-fill">No Fill</button>
+                </div>
             </div>
 
             <!-- Text (shown only for <text> elements) -->
@@ -257,23 +270,37 @@ Object.assign(MobileSVGEditor.prototype, {
                 matrix = rootCTM.inverse().multiply(elCTM);
             }
             
-            const pt = this.$svgDisplay[0].createSVGPoint();
-            pt.x = bb.x; pt.y = bb.y;
-            const worldPt = pt.matrixTransform(matrix);
-            
-            const scaleX = Math.sqrt(matrix.a * matrix.a + matrix.b * matrix.b) || 1;
-            const scaleY = Math.sqrt(matrix.c * matrix.c + matrix.d * matrix.d) || 1;
+            // Transform ALL FOUR corners, not just the top-left. Under rotation
+            // or flip the local top-left is no longer the visual top-left, so
+            // projecting one corner reported a position the user could not
+            // reconcile with what they saw or dragged (a 45-degree rect was off
+            // by ~156px, and w/h still reported the UNROTATED size because they
+            // came from the matrix scale rather than the projected box).
+            const project = (x, y) => {
+                const pt = this.$svgDisplay[0].createSVGPoint();
+                pt.x = x; pt.y = y;
+                return pt.matrixTransform(matrix);
+            };
+            const corners = [
+                project(bb.x, bb.y),
+                project(bb.x + bb.width, bb.y),
+                project(bb.x + bb.width, bb.y + bb.height),
+                project(bb.x, bb.y + bb.height),
+            ];
+            const xs = corners.map(c => c.x), ys = corners.map(c => c.y);
+            const worldX = Math.min(...xs), worldY = Math.min(...ys);
+            const worldW = Math.max(...xs) - worldX, worldH = Math.max(...ys) - worldY;
 
-            $('#prop-x').val(Math.round(worldPt.x));
-            $('#prop-y').val(Math.round(worldPt.y));
-            $('#prop-w').val(Math.round(bb.width * scaleX));
-            $('#prop-h').val(Math.round(bb.height * scaleY));
+            $('#prop-x').val(Math.round(worldX));
+            $('#prop-y').val(Math.round(worldY));
+            $('#prop-w').val(Math.round(worldW));
+            $('#prop-h').val(Math.round(worldH));
 
             // Store current world values on the DOM node for the change handlers to diff against
-            $('#prop-x').data('world', worldPt.x);
-            $('#prop-y').data('world', worldPt.y);
-            $('#prop-w').data('world', bb.width * scaleX);
-            $('#prop-h').data('world', bb.height * scaleY);
+            $('#prop-x').data('world', worldX);
+            $('#prop-y').data('world', worldY);
+            $('#prop-w').data('world', worldW);
+            $('#prop-h').data('world', worldH);
         } catch (_) {}
 
         // Rotation from transform
@@ -294,7 +321,10 @@ Object.assign(MobileSVGEditor.prototype, {
         $('#prop-stroke-width').val(parseFloat(sw) || 2);
         $('#prop-stroke-dash').val(dash);
 
-        // Fill (use visualTarget)
+        // Fill (use visualTarget). Open routes expose no fill controls because
+        // `fill` is not a meaningful style for their geometry.
+        const fillable = this._isFillableElement?.(visualTarget);
+        $('#prop-fill-group').toggle(!!fillable);
         const fill       = visualTarget.getAttribute('fill') || 'none';
         const fillOp     = parseFloat(visualTarget.getAttribute('fill-opacity') || '1');
         if (fill !== 'none' && this._isValidColor(fill)) {
@@ -349,6 +379,7 @@ Object.assign(MobileSVGEditor.prototype, {
     // ── Side panel tab switching ──────────────────────────────
     _switchSidePanelTab(tab) {
         this._activeSidePanelTab = tab;
+        try { localStorage.setItem('gx-side-panel-tab', tab); } catch (_) {}
         // Tab button active states
         $('#sidePanelTabLayers').toggleClass('active', tab === 'layers');
         $('#sidePanelTabProperties').toggleClass('active', tab === 'properties');
@@ -457,6 +488,7 @@ Object.assign(MobileSVGEditor.prototype, {
 
         // Fill color
         live('#prop-fill-color', function (el) {
+            if (!self._isFillableElement?.(el)) return;
             const val   = $(this).val();
             const opStr = $('#prop-fill-opacity').val();
             const op    = parseFloat(opStr);
@@ -468,6 +500,7 @@ Object.assign(MobileSVGEditor.prototype, {
 
         // Fill opacity
         live('#prop-fill-opacity', function (el) {
+            if (!self._isFillableElement?.(el)) return;
             const op = parseFloat($(this).val());
             self._applyStyle(el, 'fill-opacity', String(op));
         });
@@ -475,6 +508,7 @@ Object.assign(MobileSVGEditor.prototype, {
         // No fill
         $(document).on('click.prop', '#prop-no-fill', function () {
             if (!self._propPanelTarget) return;
+            if (!self._isFillableElement?.(self._propPanelTarget)) return;
             self._applyStyle(self._propPanelTarget, 'fill', 'none');
             self._applyStyle(self._propPanelTarget, 'fill-opacity', null);
             self._drawStyle.fill = 'none';

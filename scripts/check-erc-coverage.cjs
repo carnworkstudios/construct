@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ============================================================
-   Schema Editor — ERC coverage regression harness
+   Construct — ERC coverage regression harness
 
    Guards the property that ERC must never report success over
    material it did not examine.

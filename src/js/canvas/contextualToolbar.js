@@ -1,5 +1,5 @@
 /* ============================================================
-   Schema Editor — Contextual command rail
+   Construct — Contextual command rail
    Tool settings occupy the primary rail. Selection actions appear
    in a subordinate popover so creation and arrangement stay distinct.
    ============================================================ */
@@ -12,6 +12,8 @@ Object.assign(MobileSVGEditor.prototype, {
         rail.className = 'gx-context-rail';
         rail.setAttribute('aria-label', 'Tool options');
         rail.innerHTML = '<div class="gx-context-tool"></div><div class="gx-selection-actions"></div>';
+        // Body-mounted overlay on the canvas's left margin: it must not reflow
+        // the canvas, so it is deliberately NOT a child of the toolbar.
         document.body.appendChild(rail);
         this._contextRail = rail;
         this._bindContextualToolbar();
@@ -84,6 +86,7 @@ Object.assign(MobileSVGEditor.prototype, {
     _refreshContextualToolbar() {
         const rail = this._contextRail;
         if (!rail || !this._drawStyle) return;
+        let idle = false;
         const tool = this.activeTool || 'select';
         const toolHost = rail.querySelector('.gx-context-tool');
         const selectionHost = rail.querySelector('.gx-selection-actions');
@@ -106,19 +109,21 @@ Object.assign(MobileSVGEditor.prototype, {
         } else if (tool === 'select' && selected.length) {
             const visual = this._getVisualTarget?.(selected[0]) || selected[0];
             const tag = visual.tagName?.toLowerCase();
-            const supportsFill = !['line', 'polyline', 'path'].includes(tag) || visual.getAttribute('fill') !== 'none';
+            const supportsFill = !!this._isFillableElement?.(visual);
             const stroke = visual.getAttribute?.('stroke');
             const width = visual.getAttribute?.('stroke-width');
             const fill = visual.getAttribute?.('fill');
             if (stroke && this._isValidColor?.(stroke)) this._drawStyle.stroke = this._toHex(stroke);
             if (width) this._drawStyle.strokeWidth = width;
-            if (fill && fill !== 'none' && this._isValidColor?.(fill)) this._drawStyle.fill = this._toHex(fill);
+            if (supportsFill && fill && fill !== 'none' && this._isValidColor?.(fill)) this._drawStyle.fill = this._toHex(fill);
             else if (fill === 'none') this._drawStyle.fill = 'none';
             toolHost.innerHTML = `<div class="gx-rail-identity"><strong>Style</strong><small>${selected.length === 1 ? (selected[0].getAttribute?.('data-layer-name') || selected[0].id || tag || 'object') : `${selected.length} objects`}</small></div>` +
                 `<span class="gx-rail-divider"></span>` + this._styleControls({ fill: supportsFill });
         } else {
-            toolHost.innerHTML = `<div class="gx-rail-identity"><strong>${names[tool] || tool}</strong>` +
-                `<small>${selected.length ? `${selected.length} selected` : 'Choose an object or drawing tool'}</small></div>`;
+            // Select/hand with nothing selected: there is nothing to configure,
+            // so the rail says nothing rather than restating the active tool.
+            toolHost.innerHTML = '';
+            idle = true;
         }
 
         const dash = toolHost.querySelector('[data-context-input="dash"]');
@@ -137,13 +142,20 @@ Object.assign(MobileSVGEditor.prototype, {
         if (!selected.length) {
             selectionHost.innerHTML = '';
             rail.classList.remove('has-selection');
+            rail.classList.toggle('is-idle', idle);
             return;
         }
+        rail.classList.remove('is-idle');
         rail.classList.add('has-selection');
         const multi = selected.length > 1;
         const groupSelected = selected.length === 1 && selected[0].tagName?.toLowerCase() === 'g';
         const allLocked = selected.every(el => el.dataset?.locked === 'true');
+        const closedPair = selected.length === 2 && selected.every(el => this._isFillableElement?.(el));
         selectionHost.innerHTML = `<span class="gx-selection-count">${selected.length}</span>` +
+            this._contextButton('material-symbols:merge-type', 'Union', 'boolean-union', { disabled: !closedPair, title: 'Union two closed profiles' }) +
+            this._contextButton('material-symbols:remove-selection', 'Subtract', 'boolean-subtract', { disabled: !closedPair, title: 'Subtract second profile from first' }) +
+            this._contextButton('material-symbols:interests', 'Intersect', 'boolean-intersect', { disabled: !closedPair, title: 'Intersect two closed profiles' }) +
+            (closedPair ? `<span class="gx-rail-divider"></span>` : '') +
             this._contextButton('material-symbols:group-work-outline', 'Group', 'group', { disabled: !multi }) +
             this._contextButton('material-symbols:grid-view-outline', 'Ungroup', 'ungroup', { disabled: !groupSelected }) +
             this._contextButton(allLocked ? 'material-symbols:lock-open-outline' : 'material-symbols:lock-outline', allLocked ? 'Unlock' : 'Lock', 'lock') +
@@ -204,7 +216,7 @@ Object.assign(MobileSVGEditor.prototype, {
             if (kind === 'width') this._drawStyle.strokeWidth = value;
             if (kind === 'dash') this._drawStyle.strokeDasharray = value;
             if (kind === 'fill') this._drawStyle.fill = value;
-            (this._selection || []).forEach(el => this._applyStyle(el, attr, value === 'none' ? null : value));
+            (this._selection || []).forEach(el => { if (kind !== 'fill' || this._isFillableElement?.(el)) this._applyStyle(el, attr, value === 'none' ? null : value); });
             this._renderHandles?.();
             this._refreshPropertyPanel?.();
         }
@@ -216,9 +228,10 @@ Object.assign(MobileSVGEditor.prototype, {
         if (action === 'ungroup') return this.ungroupSelected();
         if (action === 'delete') return this.deleteSelected();
         if (action === 'calibrate') return this._showMeasureModal();
+        if (action.startsWith('boolean-')) return this._runPlanarBoolean(action.slice('boolean-'.length)).catch(error => this.showToast(error.message, 'error'));
         if (action === 'no-fill') {
             this._drawStyle.fill = 'none';
-            selected.forEach(el => this._applyStyle(el, 'fill', 'none'));
+            selected.forEach(el => { if (this._isFillableElement?.(el)) this._applyStyle(el, 'fill', 'none'); });
             return this._refreshContextualToolbar();
         }
         if (action === 'lock') {

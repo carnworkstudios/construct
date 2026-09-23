@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <script src="/assets/js/posthog-init.js"></script>
     <base href="/tools/schema-editor/" />
     <meta charset="UTF-8" />
     <meta
@@ -11,21 +10,21 @@
     <!-- ── Icons ── -->
     <link rel="icon" type="image/png" href="/assets/images/Ginexys_Logo.png" />
     <title>
-      General Vector Drawing — Free Browser-Based SVG Editor | GINEXYS
+      Construct — Browser-Based 2D CAD & 3D Modeling Workspace | GINEXYS
     </title>
     <meta
       name="description"
-      content="General-purpose vector drawing for illustrations, icons, and freeform diagrams. Full canvas with grouping, layers, snapping, and SVG export. Switch to Electrical, Software, or Construction for domain-specific symbol libraries."
+      content="Browser-based 2D CAD, diagramming, and 3D modeling. Draw profiles and routes, create Boolean solids, edit meshes, and work across engineering, construction, software, and academic modes."
     />
     <meta
       name="keywords"
-      content="electrical schematic editor online, circuit diagram maker free, bill of materials generator, BOM from schematic, UML diagram maker online, ER diagram tool, floor plan editor, electrical BOM generator, PCB schematic editor, Arduino circuit diagram, wiring diagram online, GINEXYS, schema editor"
+      content="browser CAD, 2D to 3D editor, profile extrusion, Boolean operations, wire route modeling, electrical schematic editor, UML diagram maker, floor plan editor, molecular viewer, GINEXYS Construct"
     />
     <meta name="author" content="GINEXYS" />
     <meta name="robots" content="index, follow" />
     <link
       rel="canonical"
-      href="https://ginexys.com/tools/schema-editor/general/"
+      href="%%SITE%%/tools/schema-editor/general/"
     />
 
     <!-- ── Open Graph ── -->
@@ -33,34 +32,34 @@
     <meta property="og:site_name" content="GINEXYS" />
     <meta
       property="og:title"
-      content="General Vector Drawing — Free Browser-Based SVG Editor | GINEXYS"
+      content="Construct — Browser-Based 2D CAD & 3D Modeling Workspace | GINEXYS"
     />
     <meta
       property="og:description"
-      content="General-purpose vector drawing for illustrations, icons, and freeform diagrams. Full canvas with grouping, layers, snapping, and SVG export. Switch to Electrical, Software, or Construction for domain-specific symbol libraries."
+      content="Browser-based 2D CAD, diagramming, and 3D modeling. Draw profiles and routes, create Boolean solids, edit meshes, and work across engineering, construction, software, and academic modes."
     />
     <meta
       property="og:url"
-      content="https://ginexys.com/tools/schema-editor/general/"
+      content="%%SITE%%/tools/schema-editor/general/"
     />
     <meta
       property="og:image"
-      content="https://ginexys.com/assets/images/og-image.png"
+      content="%%SITE%%/assets/images/og-image.png"
     />
 
     <!-- ── Twitter / X Card ── -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="General Vector Drawing — Free Browser-Based SVG Editor | GINEXYS"
+      content="Construct — Browser-Based 2D CAD & 3D Modeling Workspace | GINEXYS"
     />
     <meta
       name="twitter:description"
-      content="General-purpose vector drawing for illustrations, icons, and freeform diagrams. Full canvas with grouping, layers, snapping, and SVG export. Switch to Electrical, Software, or Construction for domain-specific symbol libraries."
+      content="Browser-based 2D CAD, diagramming, and 3D modeling. Draw profiles and routes, create Boolean solids, edit meshes, and work across engineering, construction, software, and academic modes."
     />
     <meta
       name="twitter:image"
-      content="https://ginexys.com/assets/images/og-image.png"
+      content="%%SITE%%/assets/images/og-image.png"
     />
     <meta name="twitter:site" content="@ginexys" />
 
@@ -79,7 +78,7 @@
                 "name": "Does the online schematic editor support wire tracing and Manhattan routing?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, it features precise Manhattan routing for clean layouts and a Trace Mode that highlights the complete connectivity path of any selected wire, ensuring your circuit logic is sound without requiring heavy desktop software. Review the <a href=\"https://ginexys.com/tools/schema-editor/docs/features/index.html\">Features Documentation</a> for tracing instructions."
+                  "text": "Yes, it features precise Manhattan routing for clean layouts and a Trace Mode that highlights the complete connectivity path of any selected wire, ensuring your circuit logic is sound without requiring heavy desktop software. Review the <a href=\"%%SITE%%/tools/schema-editor/docs/features/index.html\">Features Documentation</a> for tracing instructions."
                 }
               }
             ]
@@ -191,13 +190,16 @@
         "@graph": [
           {
             "@type": "WebApplication",
-            "name": "General Vector Drawing — Free Browser-Based SVG Editor",
-            "url": "https://ginexys.com/tools/schema-editor/general/",
+            "name": "Construct — Browser-Based 2D CAD & 3D Modeling Workspace",
+            "url": "%%SITE%%/tools/schema-editor/general/",
             "applicationCategory": "DeveloperApplication",
             "operatingSystem": "Web",
-            "description": "General-purpose vector drawing for illustrations, icons, and freeform diagrams. Full canvas with grouping, layers, snapping, and SVG export. Switch to Electrical, Software, or Construction for domain-specific symbol libraries.",
+            "description": "Browser-based 2D CAD, diagramming, and 3D modeling for engineering, construction, software, and Research / Academic work.",
             "featureList": [
-              "Freeform vector drawing — lines, shapes, text, and imported images",
+              "Closed profiles for fills, planar Boolean operations, and 3D extrusion",
+              "Open routes for wires, walls, conduit, and other swept 3D solids",
+              "Parametric solids, 3D Boolean operations, imported meshes, and component editing",
+              "Equation surfaces, physics vectors, PDB/CUBE molecular views, and spatial-data import",
               "Layer management with visibility toggle and element locking",
               "Group and ungroup with nested group support",
               "Snap-to-grid and snap-to-object for precise placement",
@@ -205,8 +207,8 @@
             ],
             "isPartOf": {
               "@type": "WebApplication",
-              "name": "schema editor",
-              "url": "https://ginexys.com/tools/schema-editor/"
+              "name": "Construct",
+              "url": "%%SITE%%/tools/schema-editor/"
             },
             "offers": {
               "@type": "Offer",
@@ -217,17 +219,18 @@
         ]
       }
     </script>
+      <link rel="stylesheet" href="src/css/spatialWorkspace.css?v=20260921">
   </head>
 
   <body class="dark-mode">
     <div class="app-container">
-      <header class="blueprint-appbar" aria-label="Schema Editor workspace">
+      <header class="blueprint-appbar" aria-label="Construct workspace">
         <a class="blueprint-brand" href="/" aria-label="Ginexys home">
           <span class="blueprint-brand-mark" aria-hidden="true">
             <iconify-icon icon="material-symbols:deployed-code-outline"></iconify-icon>
           </span>
           <!-- <span class="blueprint-brand-name">GINEXYS</span> -->
-          <span class="blueprint-product-name">Schema Editor</span>
+          <span class="blueprint-product-name">Construct</span>
         </a>
         <div class="blueprint-document" aria-label="Current document">
           <span class="blueprint-document-state" aria-hidden="true"></span>
@@ -277,6 +280,14 @@
             ></iconify-icon>
             Symbols
           </h4>
+          <button
+            class="palette-close-btn"
+            id="palettePinBtn"
+            title="Keep palette open"
+            aria-pressed="false"
+          >
+            <iconify-icon icon="material-symbols:keep-outline"></iconify-icon>
+          </button>
           <button
             class="palette-close-btn"
             id="palettePanelClose"
@@ -341,6 +352,7 @@
               <iconify-icon icon="material-symbols:apartment"></iconify-icon>
               Construction
             </button>
+            <button class="mode-pill" data-mode="academic" title="Physics, Chemistry and Math">Research / Academic</button>
           </div>
 
           <!-- Mobile fallback: native select (shown ≤640px via CSS) -->
@@ -354,7 +366,9 @@
             <option value="electrical">⚡ Electrical</option>
             <option value="software">◈ Software</option>
             <option value="construction">🏗 Construction</option>
+            <option value="academic">Research / Academic</option>
           </select>
+          <button class="btn" id="spatialOpenBtn" title="Open the 3D modeling and simulation workspace">3D workspace</button>
 
           <div class="control-group-flex" style="margin-left: auto; width: 50%; overflow: auto;">
             <!-- Undo / Redo -->
@@ -471,7 +485,7 @@
                 >
               </div>
               <div class="gx-mcp-popover-docs">
-                <a href="https://ginexys.com/docs#mcp-tools" target="_blank"
+                <a href="%%SITE%%/docs#mcp-tools" target="_blank"
                   >Full MCP docs &rarr;</a
                 >
               </div>
@@ -1602,6 +1616,9 @@
     <script src="/assets/schema-editor/domains/electricalKit.js"></script>
     <script src="/assets/schema-editor/domains/softwareKit.js"></script>
     <script src="/assets/schema-editor/domains/constructionKit.js"></script>
+    <!-- Academic notation is MIT and ships with the forkable tool, so it loads
+         from the submodule rather than /assets. See academicKit.js header. -->
+    <script src="src/js/domains/academicKit.js"></script>
 
     <!-- Deterministic Schematic Primitive Engine — software domain (SPE) -->
     <script src="/assets/schema-editor/spe/grammar.js"></script>
@@ -1642,6 +1659,7 @@
     <script src="src/js/features/ercEngine.js"></script>
     <script src="src/js/features/knowledgeEngine.js"></script>
     <script src="src/js/features/busEngine.js"></script>
+    <script src="src/js/spatial/bootstrap.js"></script>
 
     <script>
       $(document).ready(function () {
@@ -1701,14 +1719,34 @@
           const isOpen = $("#symbolPalettePanel").hasClass("open");
           $("#symbolPalettePanel").toggleClass("open");
           $(this).toggleClass("shifted", !isOpen);
+          $("body").toggleClass("palette-open", !isOpen);
           // Show palette for current mode if opening
           if (!isOpen && window.editor.activeMode !== "general") {
             window.editor._renderSymbolPalette(window.editor.activeMode);
           }
         });
 
+        // Palette pin — a pinned palette is not auto-closed by a mode change,
+        // and the choice is remembered for the next session.
+        const PALETTE_PIN_KEY = "gx-palette-pinned";
+        function setPalettePin(on) {
+          $("#palettePinBtn").toggleClass("is-pinned", on).attr("aria-pressed", String(on))
+            .attr("title", on ? "Unpin palette" : "Keep palette open");
+          if (on) {
+            $("#symbolPalettePanel").addClass("open"); $("body").addClass("palette-open");
+            $("#paletteToggleBtn").addClass("shifted");
+          }
+          try { localStorage.setItem(PALETTE_PIN_KEY, on ? "1" : "0"); } catch (e) {}
+        }
+        window.__gxPalettePinned = function () {
+          try { return localStorage.getItem(PALETTE_PIN_KEY) === "1"; } catch (e) { return false; }
+        };
+        $("#palettePinBtn").on("click", function () { setPalettePin(!window.__gxPalettePinned()); });
+        if (window.__gxPalettePinned()) setPalettePin(true);
+
         $("#palettePanelClose").on("click", function () {
-          $("#symbolPalettePanel").removeClass("open");
+          setPalettePin(false);
+          if (!window.__gxPalettePinned || !window.__gxPalettePinned()) { $("#symbolPalettePanel").removeClass("open"); $("body").removeClass("palette-open"); }
           $("#paletteToggleBtn").removeClass("shifted");
         });
 
@@ -1716,10 +1754,10 @@
         $(document).on("click", ".mode-pill", function () {
           const mode = $(this).data("mode");
           if (mode && mode !== "general") {
-            $("#symbolPalettePanel").addClass("open");
+            $("#symbolPalettePanel").addClass("open"); $("body").addClass("palette-open");
             $("#paletteToggleBtn").addClass("shifted");
           } else {
-            $("#symbolPalettePanel").removeClass("open");
+            if (!window.__gxPalettePinned || !window.__gxPalettePinned()) { $("#symbolPalettePanel").removeClass("open"); $("body").removeClass("palette-open"); }
             $("#paletteToggleBtn").removeClass("shifted");
           }
           // Keep mobile select in sync
@@ -1736,10 +1774,10 @@
             $(`.mode-pill[data-mode="${mode}"]`).addClass("active");
             // Palette visibility
             if (mode !== "general") {
-              $("#symbolPalettePanel").addClass("open");
+              $("#symbolPalettePanel").addClass("open"); $("body").addClass("palette-open");
               $("#paletteToggleBtn").addClass("shifted");
             } else {
-              $("#symbolPalettePanel").removeClass("open");
+              if (!window.__gxPalettePinned || !window.__gxPalettePinned()) { $("#symbolPalettePanel").removeClass("open"); $("body").removeClass("palette-open"); }
               $("#paletteToggleBtn").removeClass("shifted");
             }
           }
@@ -2090,7 +2128,7 @@
     <script>
       var SCHEMA_PRO_COPY = {
         "ipc-schema-to-tafne":
-          "Send your Schema Editor netlist to Table IDE for BOM cleanup and export. Join the waitlist to get early access.",
+          "Send your Construct netlist to Table IDE for BOM cleanup and export. Join the waitlist to get early access.",
         "schema-batch-export":
           "Batch export all loaded diagrams as SVG in one click. Join the waitlist to get early access.",
         "schema-export-sql":
@@ -2122,7 +2160,7 @@
         }
       }
 
-      // Delegated interceptor — handles all Pro-gated items in Schema Editor
+      // Delegated interceptor — handles all Pro-gated items in Construct
       document.addEventListener("click", function (e) {
         var interceptor = e.target.closest(".gx-pro-interceptor");
         if (!interceptor) return;
@@ -2142,7 +2180,7 @@
           } else {
             openProWaitlist(
               "ipc-cross-tool",
-              "Send your Schema Editor netlist to Table IDE or Document Workbench. Cross-tool flow is a Pro feature.",
+              "Send your Construct netlist to Table IDE or Document Workbench. Cross-tool flow is a Pro feature.",
             );
           }
         });

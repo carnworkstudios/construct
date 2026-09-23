@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: MIT
+// playwright-cli -s=construct-paths run-code --filename=tools/schema-editor/scripts/check-path-solids-browser.js
+async page => {
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  const check = (ok, message) => { if (!ok) throw Error(message); };
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.waitForFunction(() => window.editor);
+  await page.addScriptTag({ url: '/tools/schema-editor/vendor/boxwood.global.js' });
+  const extracted = await page.evaluate(async () => {
+    const svg = document.getElementById('svgDisplay'), root = svg.querySelector('#_cameraRotGroup') || svg;
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g'); group.setAttribute('transform', 'translate(10 20)');
+    const path = document.createElementNS(svg.namespaceURI, 'polyline'); path.id = 'path-solid-browser-fixture'; path.setAttribute('points', '100,100 500,100 500,300'); path.setAttribute('fill', 'none'); path.setAttribute('stroke', 'black'); group.append(path); root.append(group); editor._selection = [path];
+    const { selectedPaths } = await import('/tools/schema-editor/src/js/spatial/profiles.mjs');
+    const before = selectedPaths(editor, .005, 'm');
+    const old = root.getAttribute('transform'); if (root !== svg) root.setAttribute('transform', 'rotate(37 400 300)');
+    const after = selectedPaths(editor, .005, 'm');
+    if (old === null) root.removeAttribute('transform'); else root.setAttribute('transform', old);
+    const curve=document.createElementNS(svg.namespaceURI,'path');curve.setAttribute('d','M100 100 Q300 300 500 100');group.append(curve);const curved=selectedPaths(editor,.005,'m',[curve]);curve.remove();
+    return { before, after, curved };
+  });
+  check(extracted.curved[0].path.length===128,'Open curve was not sampled');
+  check(extracted.before[0].path.every((p, i) => p.every((v, j) => Math.abs(v - extracted.after[0].path[i][j]) < 1e-9)), 'Camera rotation changed source coordinates');
+  check(extracted.before[0].position.every((v, i) => Math.abs(v - extracted.after[0].position[i]) < 1e-9), 'Camera rotation changed world placement');
+  check(Math.abs(extracted.before[0].path[1][0] - extracted.before[0].path[0][0] - 2) < 1e-9, 'Calibration failed');
+  await page.locator('#spatialOpenBtn').click(); await page.locator('#s-viewport canvas').waitFor();
+  if (await page.locator('#s-tab-library').getAttribute('aria-expanded') !== 'true') await page.locator('#s-tab-library').click();
+  await page.locator('#s-extrude-group').evaluate(el => el.open = true);
+  await page.locator('#s-route-group').evaluate(el => el.open = true);
+  await page.locator('#s-unit-scale').fill('.005');
+  await page.locator('#s-route-add').click();
+  check(await page.locator('#s-objects button').count() === 1, 'Wall not created: ' + await page.locator('#s-status').innerText());
+  await page.locator('#p-height').fill('4'); await page.locator('#s-properties button[type=submit]').click();
+  check(await page.locator('#p-height').inputValue() === '4', 'Height edit failed');
+  await page.locator('#s-undo').click(); check(await page.locator('#p-height').inputValue() === '2.8', 'Height undo failed');
+  await page.locator('#s-redo').click();
+  await page.locator('#p-thickness').fill('-1'); await page.locator('#s-properties button[type=submit]').click();
+  check((await page.locator('#s-status').innerText()).includes('thickness'), 'Invalid edit not rejected');
+  await page.locator('#s-objects button').first().click();
+  await page.evaluate(() => document.getElementById('path-solid-browser-fixture').setAttribute('points', '100,100 700,100 700,300'));
+  await page.locator('#p-refresh-source').click();
+  check((await page.locator('#s-status').innerText()).includes('refreshed'), 'Source refresh failed');
+  const points = (await page.locator('#p-path').inputValue()).split(/\s+/).map(p => p.split(',').map(Number));
+  check(Math.abs(points[1][0] - points[0][0] - 3) < 1e-9, 'Refresh did not regenerate source length');
+  await page.locator('#s-route-kind').selectOption('conduit'); await page.locator('#s-route-elevation').fill('1'); await page.locator('#s-route-add').click();
+  check(await page.locator('#s-objects button').count() === 2, 'Conduit not created');
+  check(await page.locator('#p-position-2').inputValue() === '1', 'Elevation lost');
+  await page.locator('#s-export-group').evaluate(el => el.open = true);
+  const exported = page.waitForEvent('download'); await page.locator('#s-export-scene').click(); check((await exported).suggestedFilename().endsWith('.stl'), 'Path solids not exportable');
+  const pending = page.waitForEvent('download'); await page.locator('#s-save').click(); const download = await pending; const file = await download.path();
+  await page.locator('#s-scene-settings').evaluate(el => el.open = true);
+  await page.locator('#s-new').click();
+  await page.locator('#s-file').evaluate(el => el.addEventListener('change', async () => { window.__pathSaved = JSON.parse(await el.files[0].text()); }, { capture: true, once: true }));
+  await page.locator('#s-file').setInputFiles(file);
+  await page.waitForFunction(() => document.querySelectorAll('#s-objects button').length === 2);
+  await page.waitForFunction(() => window.__pathSaved);
+  const saved = await page.evaluate(() => window.__pathSaved);
+  check(saved.schema === 'gx-spatial/2', 'Wrong project version');
+  check(saved.objects[0].height === 4 && saved.objects[0].topology.vertices.length === 3, 'Recipe/identities lost');
+  await page.locator('#s-objects button').first().click();
+  check(await page.locator('#p-height').inputValue() === '4', 'Reload lost parameters');
+  await page.screenshot({ path: '.playwright-cli/construct-path-solids.png' });
+  await page.locator('#p-visible').uncheck(); await page.locator('#s-properties button[type=submit]').click();
+  await page.locator('#s-objects button').nth(1).click();
+  await page.locator('[data-camera=perspective]').click();
+  await page.screenshot({ path: '.playwright-cli/construct-conduit.png' });
+  check(errors.length === 0, 'Browser errors: ' + errors.join('; '));
+  return { passed: true, objects: saved.objects.map(o => o.kind), schema: saved.schema, errors };
+}

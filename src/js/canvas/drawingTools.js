@@ -233,12 +233,34 @@ Object.assign(MobileSVGEditor.prototype, {
     },
 
     // ── Drawing style helpers ─────────────────────────────────
+    // SVG accepts `fill` on every element, but an open route has no interior.
+    // Leaving a stale fill on a wire is particularly damaging because an SVG
+    // path may later be closed by an import/route edit and suddenly become a
+    // filled polygon. Fillability is geometric, never inferred from the current
+    // style attribute.
+    _isFillableElement(el) {
+        const target = this._getVisualTarget?.(el) || el;
+        const tag = target?.tagName?.toLowerCase();
+        if (!tag || target.getAttribute?.('data-geo-class') === 'wire' || target.hasAttribute?.('data-route-style')) return false;
+        if (['rect', 'circle', 'ellipse', 'polygon', 'text', 'tspan'].includes(tag)) return true;
+        if (tag !== 'path') return false;
+        if (target.getAttribute('data-closed-profile') === 'true') return true;
+        const d = target.getAttribute('d') || '';
+        return (d.match(/[mM]/g) || []).length === 1 && /[zZ]\s*$/.test(d);
+    },
+
     _applyDrawStyle(el) {
         const s = this._drawStyle;
         el.setAttribute('stroke', s.stroke);
         el.setAttribute('stroke-width', s.strokeWidth);
-        el.setAttribute('fill', s.fill);
-        if (s.fill !== 'none') el.setAttribute('fill-opacity', s.fillOpacity);
+        if (this._isFillableElement(el)) {
+            el.setAttribute('fill', s.fill);
+            if (s.fill !== 'none') el.setAttribute('fill-opacity', s.fillOpacity);
+            else el.removeAttribute('fill-opacity');
+        } else {
+            el.setAttribute('fill', 'none');
+            el.removeAttribute('fill-opacity');
+        }
         if (s.strokeDasharray !== 'none') el.setAttribute('stroke-dasharray', s.strokeDasharray);
         // Bake into the SVG attribute so exported files render consistently
         el.setAttribute('vector-effect', 'non-scaling-stroke');
@@ -279,6 +301,37 @@ Object.assign(MobileSVGEditor.prototype, {
         if (typeof this._scheduleGeoAnalysis === 'function') this._scheduleGeoAnalysis();
         this._revertToSelectTool();
         return el;
+    },
+
+    async _runPlanarBoolean(operation) {
+        const selected = (this._selection || []).filter(el => this._isFillableElement(el));
+        if (selected.length !== 2 || (this._selection || []).length !== 2) throw Error('Select exactly two closed shapes for a 2D Boolean. Open wires remain routes, not filled profiles.');
+        const before = this._captureFullState();
+        const profiles = await import(new URL('src/js/spatial/profiles.mjs', document.baseURI));
+        const [a, b] = profiles.closedCanvasProfiles(selected);
+        if (a.loops.length !== 1 || b.loops.length !== 1) throw Error('Use a single-contour profile as each 2D Boolean input. Extrude existing Boolean results directly.');
+        const worker = new Worker(new URL('src/js/spatial/research.worker.mjs', document.baseURI), { type: 'module' });
+        const result = await new Promise((resolve, reject) => {
+            const timer = setTimeout(() => { worker.terminate(); reject(Error('2D Boolean exceeded the 30 second geometry budget.')); }, 30000);
+            worker.onmessage = ({ data }) => { clearTimeout(timer); worker.terminate(); data.error ? reject(Error(data.error)) : resolve(data.result); };
+            worker.onerror = () => { clearTimeout(timer); worker.terminate(); reject(Error('2D Boolean worker failed.')); };
+            worker.postMessage({ operation: 'planar-boolean', input: { a: a.loops[0], b: b.loops[0], operation } });
+        });
+        const primary = this._getVisualTarget?.(selected[0]) || selected[0];
+        const fill = this._isValidColor?.(primary.getAttribute('fill')) ? primary.getAttribute('fill') : (this._drawStyle.fill === 'none' ? '#4facfe' : this._drawStyle.fill);
+        const path = document.createElementNS(this.SVG_NS, 'path');
+        path.id = `el_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
+        path.setAttribute('d', result.loops.map(loop => `M ${loop.map(p => `${p[0]} ${p[1]}`).join(' L ')} Z`).join(' '));
+        path.setAttribute('fill-rule', 'evenodd'); path.setAttribute('data-closed-profile', 'true');
+        path.setAttribute('data-construct-boolean', operation);
+        path.setAttribute('fill', fill); path.setAttribute('fill-opacity', primary.getAttribute('fill-opacity') || '1');
+        path.setAttribute('stroke', primary.getAttribute('stroke') || this._drawStyle.stroke);
+        path.setAttribute('stroke-width', primary.getAttribute('stroke-width') || this._drawStyle.strokeWidth);
+        path.setAttribute('vector-effect', 'non-scaling-stroke');
+        selected.forEach(el => el.remove()); this._contentRoot.appendChild(path);
+        this.clearSelection?.(); this.selectEl(path); this.pushHistory(`2D Boolean: ${operation}`, before, this._captureFullState());
+        this._refreshPropertyPanel?.(); this._refreshContextualToolbar?.(); this.buildLayersTree?.();
+        this.showToast(`${operation[0].toUpperCase() + operation.slice(1)} created a closed profile. It can now extrude in 3D.`, 'success');
     },
 
     _cancelDraw() {

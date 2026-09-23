@@ -1,6 +1,6 @@
 # GinexysEngine — Standalone Engine Reference
 
-`GinexysEngine` is the computation layer extracted from the Schema Editor and exposed as a standalone namespace. The engines below run independently of the diagram UI — no SVG canvas, no editor state required.
+`GinexysEngine` is the computation layer extracted from Construct and exposed as a standalone namespace. The engines below run independently of the diagram UI — no SVG canvas, no editor state required.
 
 ```js
 window.GinexysEngine = {

@@ -245,6 +245,15 @@ body.dark-mode .mode-pill.active {
     background: rgba(79, 172, 254, 0.2);
 }
 
+/* Pinned palette: stays open through mode changes and across reloads. */
+#palettePinBtn.is-pinned {
+    color: #4facfe;
+    background: rgba(79, 172, 254, 0.18);
+    border-radius: 6px;
+}
+#palettePinBtn iconify-icon { transition: transform .15s; }
+#palettePinBtn.is-pinned iconify-icon { transform: rotate(-45deg); }
+
 /* Light mode overrides */
 body:not(.dark-mode) #symbolPalettePanel {
     background: rgba(245, 248, 255, 0.98);

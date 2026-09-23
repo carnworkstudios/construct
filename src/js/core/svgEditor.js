@@ -405,7 +405,12 @@ class MobileSVGEditor {
                 this.selectEl(el, false);
             }
             if (!this.$sidePanel.hasClass('open')) this.$sidePanel.addClass('open');
-            this._switchSidePanelTab('properties');
+            // Respect the tab the user chose. Right-click used to force
+            // Properties, which silently threw away a deliberate Layers view on
+            // every context-menu click. Only default to Properties when no tab
+            // has been chosen yet.
+            if (!this._activeSidePanelTab) this._switchSidePanelTab('properties');
+            else this._switchSidePanelTab(this._activeSidePanelTab);
         });
 
         // Measure modal

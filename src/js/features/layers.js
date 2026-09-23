@@ -48,8 +48,12 @@ Object.assign(MobileSVGEditor.prototype, {
         const $panel = $('#layersPanel');
         $panel.empty();
 
-        // Default mode: structure view
-        if (!this._layerPanelMode) this._layerPanelMode = 'structure';
+        // Default mode: structure view, unless a previous session chose otherwise.
+        if (!this._layerPanelMode) {
+            let saved = null;
+            try { saved = localStorage.getItem('gx-layer-view'); } catch (_) {}
+            this._layerPanelMode = saved === 'analysis' ? 'analysis' : 'structure';
+        }
 
         // Walk _contentRoot (inside _cameraRotGroup) — structural elements never appear here.
         const contentRoot = this._contentRoot;
@@ -80,6 +84,7 @@ Object.assign(MobileSVGEditor.prototype, {
             e.stopPropagation(); // prevent document close-panel handler seeing detached target
             const view = $(e.currentTarget).data('view');
             this._layerPanelMode = view;
+            try { localStorage.setItem('gx-layer-view', view); } catch (_) {}
             this.buildLayersTree();
         });
         // Render toggle above the scroll container so it's always visible

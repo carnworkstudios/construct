@@ -1,46 +1,67 @@
-# 📐 Schema Editor
+# 📐 Construct
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Vanilla JS](https://img.shields.io/badge/Vanilla-JS-yellow.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)
 
-A high-performance, browser-native vector design environment specifically optimized for **Electrical Schematics**, **Software Architecture**, and **Architectural Floorplans**.
+A browser-native CAD, diagramming, and scientific-modeling workspace for turning
+2D plans, routes, and profiles into inspectable 3D geometry. Construct supports
+electrical schematics and PCB layouts, software architecture diagrams, construction
+plans, spatial data, and Research / Academic work in physics, chemistry, and math.
 
-![Schema Editor Demo](./assets/schema-demo.gif)
+![Construct Demo](./assets/schema-demo.gif)
 
-## 💡 Why Schema Editor?
+## 💡 Why Construct?
 
-Most web-based drawing tools are either generic (Figma/Canva) or overly complex legacy CAD ports. **Schema Editor** bridges the gap: it provides the precision and domain-specific logic of engineering software with the speed and accessibility of a modern web app.
+Most web-based drawing tools are either generic (Figma/Canva) or overly complex legacy CAD ports. **Construct** bridges the gap: it provides the precision and domain-specific logic of engineering software with the speed and accessibility of a modern web app.
 
-### The "Magic" Features:
-*   **🔌 Intelligent Manhattan Routing**: Automatic orthogonal wiring that stays clean as you move components.
-*   **🔍 Real-Time Wire Tracing**: Instantly highlight the complete connectivity path of any signal or net.
-*   **🏗 Domain-Specific Kits**: Pre-built, high-quality symbol libraries for Electrical (PCB/Circuit), Software (UML/ERD/FSM), and Construction (AEC/Floorplans).
-*   **🚀 Zero Dependencies**: Built entirely with Vanilla JS and SVG. No heavy frameworks, no virtual DOM overhead—just pure performance.
-*   **🎮 3D View Transformation**: Native Tilt, Yaw, and Perspective controls for interactive diagram presentations.
+### What makes Construct useful
+
+* **One 2D-to-3D geometry model**: closed profiles can be filled, combined, and extruded; open lines, polylines, and wires can be swept into physical routes such as walls or conduit.
+* **2D and 3D Boolean operations**: Union, Subtract, and Intersect create closed planar profiles in 2D and robust mesh results in 3D. Interior contours are retained as extrusion holes.
+* **Parametric and direct modeling**: create primitives, extrusions, path solids, constrained features, and imported meshes; then transform objects or edit mesh vertices, edges, and faces.
+* **Engineering-aware drawing**: Manhattan routing, wire tracing, netlists, BOMs, calibrated measurement, snapping, layers, and domain symbol kits.
+* **Research / Academic workspace**: equation surfaces and animation, vector and matrix views, collision demonstrations, PDB/CUBE/CSV/STL/OBJ import, molecule and orbital views, labels, and graph-sample transfer to Table IDE.
+* **Browser-native performance**: the 2D editor stays light; Three.js, Manifold WASM, and workers load only when 3D is opened. Vendored dependencies keep the workspace self-contained without a CDN.
 
 ---
 
 ## 🛠 Features at a Glance
 
-*   **Touch-Optimized Canvas**: Smooth pan/zoom with multi-touch and stylus support.
-*   **Precision Snapping**: Intelligent grid and object snapping for pixel-perfect engineering.
-*   **Layer Management**: Full control over visibility, locking, and stacking order.
-*   **Measurement System**: Calibrated system supporting both Metric and Imperial units.
-*   **Multi-Format Export**: Save as SVG, PDF, HPGL, JSON, or export netlists directly to [Table IDE](https://github.com/carnworkstudios/table-ide).
+* **CAD drawing rules**: open geometry is stroke-only; closed geometry owns fills and can become a profile, Boolean result, or 3D solid.
+* **Precision canvas**: pan, zoom, touch/stylus input, grid and object snapping, layers, locking, grouping, and calibrated metric or imperial measurements.
+* **3D scene tools**: camera views, 2D underlay, wireframe, levels, scene save/load, STL/OBJ export, and bounded undo/redo.
+* **Model inspection**: labels and tags can target objects, mesh components, path components, and molecular atoms, residues, or chains.
+* **Cross-tool work**: export SVG, PDF, HPGL, JSON, netlists, BOMs, graph samples, SQL DDL, Mermaid, and XState; send structured data to [Table IDE](https://github.com/carnworkstudios/table-ide) where available.
 
 ---
 
 ## 📚 Domain Modes
 
 ### ⚡ Electrical & PCB
-Focus on connectivity. Specialized symbols for passive components, ICs, and connectors. Built-in logic for Netlist generation and BOM export.
+Draw connectivity with specialized components, routing, trace mode, netlists, and BOM export. Physical wire routes can become rectangular or circular 3D runs; closed PCB-like outlines can become substrates or other extruded geometry.
 
 ### ◈ Software Design
-Build UML diagrams, ERDs, and State Machines. Features auto-routing for sequence diagrams and Mermaid-compatible export.
+Build UML diagrams, ERDs, state machines, and sequence diagrams with routing and Mermaid-compatible export. Import or create spatial data as point clouds and meshes, then inspect it in wireframe or edit its components.
 
 ### 🏗 Construction & AEC
-Precision tools for architectural layouts. Includes symbols for walls, openings, MEP (Mechanical/Electrical/Plumbing), and site utilities.
+Turn plan geometry into 3D. Closed floor plans and footprints extrude into solids; open routes sweep into aligned walls or hollow conduit. Use levels, elevation, openings, 2D underlay alignment, and editable meshes to inspect a plan in space.
+
+### 🧪 Research / Academic
+Use the academic kit for physics, chemistry, and math notation in 2D, then explore models in 3D. Plot and animate safe `z = f(x,y,t)` equations, view vectors and matrix transforms, demonstrate elastic collisions, inspect PDB proteins and peptides, display molecular styles and orbitals, import CUBE scalar fields, and label significant structures.
+
+## 📐 How 2D becomes 3D
+
+Construct interprets the canvas as the XY plane and uses Z for elevation. This
+makes a drawing a source of geometry rather than a disconnected picture:
+
+1. Draw a **closed profile** such as a polygon, circle, closed path, or 2D Boolean result. Apply a fill if useful, then solidify it as an extrusion. Subtractions retain interior voids.
+2. Draw an **open route** such as a line, polyline, or wire. It remains unfilled in 2D and can be swept into a rectangular or hollow circular solid in 3D.
+3. Place the original drawing on the 3D underlay, inspect the result from any camera angle, and bake supported procedural geometry to edit vertices, edges, and faces.
+
+See the [3D guide](docs/3d-guide.md) for object types, limits, performance design,
+and scientific scope. The [workspace guide](docs/spatial-workspace.md) documents
+the interactive controls and supported import formats.
 
 ---
 

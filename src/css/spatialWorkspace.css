@@ -1,0 +1,144 @@
+/* SPDX-License-Identifier: MIT */
+.spatial-workspace { --s-line:var(--bp-line-strong,#bacbd2); position:fixed; inset:0; width:100vw; height:100dvh; max-width:none; max-height:none; margin:0; padding:0; border:0; color:var(--bp-ink,#18313b); background:var(--bp-shell,#f7fafb); font:13px var(--bp-font,Arial,sans-serif); }
+.spatial-workspace[open] { display:flex; flex-direction:column; }
+.spatial-workspace::backdrop { background:#18313b80; }
+.spatial-workspace * { box-sizing:border-box; }
+.spatial-workspace button, .spatial-workspace input, .spatial-workspace select, .spatial-workspace textarea { font:inherit; color:inherit; background:var(--bp-input-bg,#fff); border:1px solid var(--s-line); border-radius:3px; padding:7px 9px; min-width:0; }
+.spatial-workspace button { cursor:pointer; min-height:33px; }
+.spatial-workspace button:hover, .spatial-workspace button[aria-pressed=true] { background:var(--bp-item-hover,#e8f3f5); border-color:var(--bp-cyan,#0f8da2); }
+.spatial-workspace :focus-visible { outline:2px solid var(--bp-cyan,#0f8da2); outline-offset:2px; }
+.spatial-workspace button:disabled { opacity:.45; cursor:default; }
+.spatial-workspace [hidden] { display:none!important; }
+.spatial-workspace label { display:flex; flex-direction:column; gap:5px; margin:9px 0; font-size:12px; }
+.spatial-workspace input[type=checkbox] { width:auto; }
+.spatial-workspace label:has(input[type=checkbox]) { flex-direction:row; align-items:center; }
+.spatial-workspace input[type=color] { padding:2px; width:100%; height:32px; }
+.spatial-header { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--s-line); }
+.spatial-header>div { margin-right:auto; }
+.spatial-header strong { font-size:18px; display:block; }
+.spatial-header span { color:var(--bp-muted,#607b86); font-size:11px; }
+.spatial-header label { margin:0; flex-direction:row; align-items:center; }
+/* Both side panels are DRAWERS, matching #symbolPalettePanel in 2D: the stage
+   gets the full width and each panel slides over it from its own edge. Three
+   permanent columns left the viewport ~490px narrower than the window on a
+   laptop, which is most of what made the workspace feel cramped. */
+.spatial-layout { position:relative; display:block; flex:1; min-height:0; }
+.spatial-library,.spatial-inspector {
+    position:absolute; top:0; bottom:0; z-index:12;
+    width:248px; padding:12px 14px;
+    background:var(--bp-shell,#f7fafb);
+    overflow:auto; overscroll-behavior:contain;
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+.spatial-library { left:0; border-right:1px solid var(--s-line); transform:translateX(-100%); }
+.spatial-inspector { right:0; width:268px; border-left:1px solid var(--s-line); transform:translateX(100%); }
+.spatial-library.open,.spatial-inspector.open { transform:translateX(0); }
+
+/* Edge tabs, same affordance and geometry as #paletteToggleBtn in 2D. */
+.spatial-drawer-tab {
+    position:absolute; top:50%; z-index:13;
+    display:flex; align-items:center; gap:6px;
+    padding:11px 6px;
+    border:1px solid var(--s-line);
+    background:var(--bp-panel,#fff);
+    color:var(--bp-cyan,#0f8da2);
+    cursor:pointer;
+    writing-mode:vertical-rl; text-orientation:mixed;
+    font:600 11px/1 var(--bp-font,Arial,sans-serif);
+    transition:left .25s cubic-bezier(.4,0,.2,1), right .25s cubic-bezier(.4,0,.2,1), background .15s;
+    transform:translateY(-50%);
+}
+.spatial-drawer-tab:hover { background:var(--bp-item-hover,#e8f3f5); }
+.spatial-drawer-tab[data-drawer="library"] { left:0; border-left:none; border-radius:0 8px 8px 0; }
+.spatial-drawer-tab[data-drawer="inspector"] { right:0; border-right:none; border-radius:8px 0 0 8px; transform:translateY(-50%) rotate(180deg); }
+.spatial-drawer-tab[data-drawer="library"].shifted { left:248px; }
+.spatial-drawer-tab[data-drawer="inspector"].shifted { right:268px; }
+.spatial-drawer-tab iconify-icon { font-size:15px; }
+
+/* Pin: keeps a drawer open across selections and reloads. */
+.spatial-pin {
+    position:absolute; top:10px; right:12px;
+    display:grid; place-items:center;
+    width:26px; height:26px; padding:0;
+    border:1px solid transparent; border-radius:6px;
+    background:none; color:var(--bp-muted,#607b86);
+    cursor:pointer; min-height:0;
+}
+.spatial-pin:hover { background:var(--bp-hover,#e8f3f5); color:var(--bp-ink,#18313b); }
+.spatial-pin.is-pinned { color:var(--bp-cyan,#0f8da2); border-color:var(--s-line); background:var(--bp-item-hover,#e8f3f5); }
+.spatial-pin iconify-icon { font-size:16px; transition:transform .15s; }
+.spatial-pin.is-pinned iconify-icon { transform:rotate(-45deg); }
+.spatial-library h2:first-of-type,.spatial-inspector h2:first-of-type { padding-right:32px; }
+
+/* An open drawer covers the stage's left/right edge, so the view controls slide
+   clear of it rather than hiding underneath. The canvas itself is unaffected —
+   only the toolbar row needs to move. */
+.spatial-layout.library-open .spatial-viewbar { padding-left:256px; }
+.spatial-layout.inspector-open .spatial-viewbar { padding-right:276px; }
+.spatial-viewbar { transition:padding .25s cubic-bezier(.4,0,.2,1); }
+.spatial-workspace h2 { margin:7px 0 12px; font-size:14px; }
+.spatial-workspace p { font-size:12px; line-height:1.5; color:var(--bp-muted,#607b86); }
+.spatial-workspace details { margin:16px 0; border-top:1px solid var(--s-line); padding-top:10px; }
+.spatial-workspace summary { cursor:pointer; font-weight:600; }
+#s-catalog,#s-objects { display:flex; flex-direction:column; gap:5px; }
+#s-catalog button,#s-objects button { text-align:left; overflow-wrap:anywhere; }
+.spatial-library details>button,.spatial-inspector>button,#s-properties>button { width:100%; margin-top:7px; }
+/* The pin is a corner affordance, not a panel action — exempt it from the
+   full-width rule above, which otherwise stretches it across the header. */
+.spatial-library>.spatial-pin,.spatial-inspector>.spatial-pin { width:26px; margin-top:0; }
+.spatial-pair,.spatial-triple { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.spatial-triple { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.spatial-workspace fieldset { margin:12px 0; padding:3px 8px; border:1px solid var(--s-line); }
+.spatial-workspace legend { font-size:12px; }
+/* The layout is no longer a grid, so the stage must claim the full area itself. */
+.spatial-stage { position:absolute; inset:0; display:flex; flex-direction:column; min-width:0; overflow:hidden; background:#e4eaed; }
+.spatial-viewbar { display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding:8px; background:var(--bp-shell,#f7fafb); border-bottom:1px solid var(--s-line); }
+.spatial-viewbar label { flex-direction:row; align-items:center; margin:0 3px; }
+#s-viewport { flex:1; min-height:180px; position:relative; }
+#s-viewport canvas { display:block; position:absolute; inset:0; touch-action:none; }
+.spatial-axis-key { padding:3px 12px; font-size:11px; color:#26424e; }
+.spatial-axis-key span { margin-right:10px; }
+.spatial-shortcuts { position:absolute; left:12px; bottom:10px; z-index:2; max-width:calc(100% - 24px); padding:5px 7px; border-radius:3px; background:#102733d9; color:#fff; font-size:10px; pointer-events:none; }
+.spatial-selection-help { margin:0 0 8px; font-size:11px; line-height:1.35; color:var(--bp-muted,#607b86); }
+.spatial-timeline { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:9px; border-top:1px solid var(--s-line); background:var(--bp-panel,#fff); }
+.spatial-timeline label { flex-direction:row; align-items:center; margin:0; }
+#s-time { width:80px; }
+#s-clock { font-variant-numeric:tabular-nums; }
+#s-stats { margin-left:auto; font-size:11px; color:var(--bp-muted,#607b86); }
+.spatial-transform { display:flex; gap:4px; }
+#s-status { min-height:33px; padding:9px 16px; border-top:1px solid var(--s-line); font-size:12px; }
+#s-status.error { color:var(--bp-danger,#b53640); }
+@media(max-width:1050px) { .spatial-header { padding:8px; } }
+@media(max-width:760px) {
+    /* Drawers go near-full-width on a phone; the stage is behind them, so an
+       open drawer is a deliberate mode rather than a permanent squeeze. */
+    .spatial-library,.spatial-inspector { width:min(86vw,300px); }
+    .spatial-drawer-tab[data-drawer="library"].shifted,
+    .spatial-drawer-tab[data-drawer="inspector"].shifted { left:auto; right:auto; }
+    .spatial-drawer-tab[data-drawer="library"].shifted { left:min(86vw,300px); }
+    .spatial-drawer-tab[data-drawer="inspector"].shifted { right:min(86vw,300px); }
+    .spatial-header>div { width:100%; } .spatial-header button { font-size:11px; padding:5px; }
+}
+@media(max-width:420px) { .spatial-library { padding:8px; } }
+/* Step headings carry the flow; the numeral is quieter than the label. */
+.spatial-workspace h2 { display:flex; align-items:baseline; gap:6px; color:var(--bp-ink,#18313b); }
+#s-empty-hint { margin:8px 0 4px; padding:10px; border:1px dashed var(--s-line); border-radius:4px; background:var(--bp-item-hover,#e8f3f5); color:var(--bp-muted,#607b86); }
+#s-empty-hint em { font-style:normal; font-weight:600; color:var(--bp-ink,#18313b); }
+/* Closed disclosures read as secondary so the primary step stays dominant. */
+.spatial-workspace details:not([open])>summary { color:var(--bp-muted,#607b86); font-weight:500; }
+.spatial-workspace details>summary:hover { color:var(--bp-cyan,#0f8da2); }
+#s-export-group>button { width:100%; margin-top:7px; }
+
+/* Mesh export format picker. Sits above the two scope buttons, which are
+   plain full-width buttons like the rest of the inspector. */
+.spatial-export { display: flex; align-items: center; gap: 8px; margin: 8px 0 6px; font-size: .82rem; }
+.spatial-export select { flex: 1; min-width: 0; }
+#s-underlay-refresh { padding:2px 8px; font-size:11px; }
+/* Bounded labels are projected only on rendered frames, never on an idle timer. */
+.spatial-labels { position:absolute;inset:0;pointer-events:none;overflow:hidden; }
+.spatial-labels span { position:absolute;transform:translate(-50%,-110%);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#102733df;color:#fff;padding:3px 6px;border-radius:3px;font-size:11px; }
+.spatial-workspace .spatial-result { max-height:180px;overflow:auto;white-space:pre-wrap;font:11px monospace; }
+@media(min-width:761px) {
+  .spatial-layout.library-open .spatial-timeline { padding-left:256px; }
+  .spatial-layout.inspector-open .spatial-timeline { padding-right:276px; }
+}
